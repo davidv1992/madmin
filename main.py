@@ -11,5 +11,6 @@ import madmin_user
 import madmin_barcodes
 import madmin_budget
 import madmin_products
+import madmin_voorraad
 
 madmin_server.run()
