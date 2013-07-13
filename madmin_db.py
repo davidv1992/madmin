@@ -86,6 +86,7 @@ class Query(object):
 				self.cursor.execute(self.querystring)
 			else:
 				self.cursor.execute(self.querystring, parameters)
+			log.debug("Query %s, rows affected: %d", self.querystring, self.cursor.rowcount)
 		except dbapi.Error, e:
 			log.error("Error during query execution.", exc_info=e)
 			_has_error = True
@@ -100,8 +101,24 @@ class Query(object):
 		if _has_error:
 			_db_connect()
 		try:
-			result = self.cursor.fetchall()
+			return self.cursor.fetchall()
 		except dbapi.Error, e:
 			log.error("Error during fetching of rows.", exc_info=e)
+			_has_error = True
+			raise DatabaseError
+	
+	def lastrowid():
+		global _has_error
+		"""
+		Get id of last inserted row
+		Can throw DatabaseError
+		"""
+		if _has_error:
+			raise DatabaseError	# Cannot return sensible result after an error, so error
+		
+		try:
+			return self.cursor.lastrowid
+		except dbapi.Error, e:
+			log.error("Error during fetching of lastrowid.", exc_info=e)
 			_has_error = True
 			raise DatabaseError
