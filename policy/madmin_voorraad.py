@@ -1,4 +1,2 @@
-import operator
-
 def voorraad_order(voorraad):
-	return sorted(voorraad, key=attrgetter('datum'))
+	return sorted(voorraad, key=lambda voorraad_el: voorraad_el['datum'])

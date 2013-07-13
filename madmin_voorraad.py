@@ -23,7 +23,7 @@ def query_voorraad(prd_id):
 	try:
 		q = Query("""SELECT vrd_id, vrd_datum, vrd_resterend, vrd_stukprijs, vrd_btw 
 		             FROM tblvoorraad
-		             WHERE vrd_resterend <> 0""")
+		             WHERE vrd_resterend <> 0 AND vrd_prd_id = %s""")
 		q.run((prd_id,))
 		rows = q.rows()
 	except DatabaseError:
@@ -57,7 +57,7 @@ def use_voorraad(prd_id, aantal):
 			raise VoorraadTekortError
 		if (cur_voorraad[i]['resterend'] > aantal):
 			deel_aantal = aantal
-		else
+		else:
 			deel_aantal = cur_voorraad[i]['resterend']
 		
 		try:
@@ -74,16 +74,18 @@ def use_voorraad(prd_id, aantal):
 	
 	return result
 
-def _convert_datum(voorraad_el)
+def _convert_datum(voorraad_el):
 	voorraad_el['datum'] = str(voorraad_el['datum'])
 	return voorraad_el
 
-def handle_voorraad(params, json_data)
+def handle_voorraad(params, json_data):
+	if 'product_id' not in params:
+		return None
 	if not hasPermission(params, 'voorraad', None):
-		return []
+		return None
 	
 	result = []
-	for prd_id in params=['product_id']:
+	for prd_id in params['product_id']:
 		voorraad = query_voorraad(prd_id)
 		voorraad = map(_convert_datum, voorraad)
 		result.append({
@@ -92,3 +94,6 @@ def handle_voorraad(params, json_data)
 		})
 	
 	return result
+
+add_handler('/voorraad', handle_voorraad)
+log.info("Module voorraad initialized")
