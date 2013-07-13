@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: May 24, 2013 at 09:02 AM
+-- Generation Time: Jul 13, 2013 at 10:55 AM
 -- Server version: 5.5.31
 -- PHP Version: 5.4.6-1ubuntu1.2
 
@@ -19,6 +19,18 @@ SET time_zone = "+00:00";
 --
 -- Database: `madmin`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tblbarcode`
+--
+
+CREATE TABLE IF NOT EXISTS `tblbarcode` (
+  `bar_ean` int(16) NOT NULL,
+  `bar_prd_id` int(11) NOT NULL,
+  PRIMARY KEY (`bar_ean`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -47,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `tblbudget` (
   `bdgt_current` int(11) NOT NULL,
   PRIMARY KEY (`bdgt_id`),
   KEY `bdgt_vrg_id` (`bdgt_ver_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
@@ -57,6 +69,7 @@ CREATE TABLE IF NOT EXISTS `tblbudget` (
 
 CREATE TABLE IF NOT EXISTS `tblfactuur` (
   `fac_id` int(11) NOT NULL AUTO_INCREMENT,
+  `fac_bkjr_id` int(11) NOT NULL,
   `fac_type` int(11) NOT NULL,
   `fac_ver_id` int(11) DEFAULT NULL,
   `fac_leverancier` text,
@@ -69,6 +82,66 @@ CREATE TABLE IF NOT EXISTS `tblfactuur` (
   `fac_saldo_speciaal_na` int(11) NOT NULL,
   `fac_saldo_basis_na` int(11) NOT NULL,
   PRIMARY KEY (`fac_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tblfactuurregel`
+--
+
+CREATE TABLE IF NOT EXISTS `tblfactuurregel` (
+  `frgl_id` int(11) NOT NULL AUTO_INCREMENT,
+  `frgl_type` int(11) NOT NULL,
+  `frgl_vrd_id` int(11) DEFAULT NULL,
+  `frgl_omschrijving` int(11) DEFAULT NULL,
+  `frgl_aantal` int(11) NOT NULL,
+  `frgl_stukprijs` int(11) NOT NULL,
+  `frgl_totprijs` int(11) NOT NULL,
+  `frgl_btw` int(11) NOT NULL,
+  PRIMARY KEY (`frgl_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tblgebruiker`
+--
+
+CREATE TABLE IF NOT EXISTS `tblgebruiker` (
+  `gebr_id` int(11) NOT NULL AUTO_INCREMENT,
+  `gebr_naam` text NOT NULL,
+  `gebr_wachtwoord` text NOT NULL,
+  PRIMARY KEY (`gebr_id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tblkantine`
+--
+
+CREATE TABLE IF NOT EXISTS `tblkantine` (
+  `kan_id` int(11) NOT NULL AUTO_INCREMENT,
+  `kan_naam` text NOT NULL,
+  PRIMARY KEY (`kan_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tblkantineverkoop`
+--
+
+CREATE TABLE IF NOT EXISTS `tblkantineverkoop` (
+  `kav_id` int(11) NOT NULL AUTO_INCREMENT,
+  `kav_prd_id` int(11) NOT NULL,
+  `kav_aantal` int(11) NOT NULL,
+  `kav_ver_id` int(11) DEFAULT NULL,
+  `kav_stukprijs` int(11) NOT NULL,
+  `kav_totaalprijs` int(11) NOT NULL,
+  `kav_kan_id` int(11) NOT NULL,
+  PRIMARY KEY (`kav_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -87,7 +160,7 @@ CREATE TABLE IF NOT EXISTS `tblproduct` (
   `prd_kantineprijs_extern` int(11) NOT NULL,
   `prd_borrelmarge` int(11) NOT NULL,
   `prd_leverancier_id` text NOT NULL,
-  `embalageprijs` int(11) NOT NULL,
+  `prd_embalageprijs` int(11) NOT NULL,
   PRIMARY KEY (`prd_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
@@ -108,6 +181,34 @@ CREATE TABLE IF NOT EXISTS `tblproductrelation` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tbltellijst`
+--
+
+CREATE TABLE IF NOT EXISTS `tbltellijst` (
+  `tel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tel_type` int(11) NOT NULL,
+  `tel_begindatum` date NOT NULL,
+  `tel_einddatum` date NOT NULL,
+  PRIMARY KEY (`tel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tbltellijstregel`
+--
+
+CREATE TABLE IF NOT EXISTS `tbltellijstregel` (
+  `tlr_id` int(11) NOT NULL AUTO_INCREMENT,
+  `tlr_tel_id` int(11) NOT NULL,
+  `tlr_prd_id` int(11) NOT NULL,
+  `tlr_aantal` int(11) NOT NULL,
+  PRIMARY KEY (`tlr_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `tblvereniging`
 --
 
@@ -116,7 +217,7 @@ CREATE TABLE IF NOT EXISTS `tblvereniging` (
   `ver_naam` text NOT NULL,
   `ver_email` text NOT NULL,
   PRIMARY KEY (`ver_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 
@@ -127,6 +228,7 @@ CREATE TABLE IF NOT EXISTS `tblvereniging` (
 CREATE TABLE IF NOT EXISTS `tblvoorraad` (
   `vrd_id` int(11) NOT NULL AUTO_INCREMENT,
   `vrd_prd_id` int(11) NOT NULL,
+  `vrd_datum` date NOT NULL,
   `vrd_aantal` int(11) NOT NULL,
   `vrd_resterend` int(11) NOT NULL,
   `vrd_stukprijs` int(11) NOT NULL,
