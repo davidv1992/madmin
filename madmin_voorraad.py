@@ -42,16 +42,22 @@ def query_voorraad(prd_id):
 	
 	return policy.voorraad_order(result)
 
+def ammount_voorraad(prd_id):
+	cur_voorraad = query_voorraad(prd_id)
+	
+	aantal = 0
+	
+	for voorraad in cur_voorraad:
+		aantal += voorraad['resterend']
+	
+	return aantal
+
 def use_voorraad(prd_id, aantal):
 	cur_voorraad = query_voorraad(prd_id)
 	
 	i=0
 	result = []
-	try:
-		q = Query("""UPDATE tblvoorraad SET vrd_resterend = %s WHERE vrd_id = %s""")
-	except DatabaseError:
-		raise InternalServerError
-		
+	
 	while aantal != 0:
 		if (i > len(cur_voorraad)):
 			raise VoorraadTekortError
@@ -60,17 +66,31 @@ def use_voorraad(prd_id, aantal):
 		else:
 			deel_aantal = cur_voorraad[i]['resterend']
 		
-		try:
-			q.run((cur_voorraad[i]['resterend'] - deel_aantal, cur_voorraad[i]['id']))
-		except DatabaseError:
-			raise InternalServerError	
-			# Try to think up a way of making this more robust against partial execution of query
+		cur_voorraad[i]['gebruikt'] = deel_aantal
+		
 		aantal -= deel_aantal
 		result.append({
 			'aantal': deel_aantal,
 			'stukprijs': cur_voorraad[i]['stukprijs'],
 			'btw': cur_voorraad[i]['btw']
 		})
+		
+		i += 1
+	
+	
+	try:
+		q = Query("""UPDATE tblvoorraad SET vrd_resterend = %s WHERE vrd_id = %s""")
+	except DatabaseError:
+		raise InternalServerError
+		
+	while 'gebruikt' in cur_voorraad[i]:
+		try:
+			q.run((cur_voorraad[i]['resterend'] - cur_voorraad[i]['gebruikt'], cur_voorraad[i]['id']))
+		except DatabaseError:
+			raise InternalServerError	
+			# Try to think up a way of making this more robust against partial execution of query
+		
+		i += 1
 	
 	return result
 
