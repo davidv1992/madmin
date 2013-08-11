@@ -25,26 +25,7 @@ def handle_kantine(params, json_data):
 	
 	return result
 
-
-def handle_product(params, json_data):
-	try:
-		q_prod = Query("""SELECT prd_id, prd_naam, prd_type, prd_btw,
-		                         prd_kantineprijs_leden, prd_kantineprijs_extern, 
-		                         prd_borrelmarge, prd_leverancier_id, 
-		                         prd_embalageprijs 
-		                  FROM tblproduct WHERE prd_verwijderd = 0
-		                  ORDER BY prd_id""")
-		q_prod.run()
-		rows_prod = q_prod.rows()
-		
-		q_rel = Query("""SELECT prdrel_orig_prd_id, prdrel_rel_prd_id
-		                        prdrel_aantal
-		                 FROM tblproductrelation""")
-		q_rel.run()
-		rows_rel = q_rel.rows()
-	except DatabaseError:
-		raise InternalServerError
-	
+def _convert_product_rows(rows_prod, rows_rel):
 	result = []
 	
 	rel_iter = 0
@@ -74,6 +55,48 @@ def handle_product(params, json_data):
 		})
 	
 	return result
+
+def query_product(prd_id)
+	try:
+		q_prod = Query("""SELECT prd_id, prd_naam, prd_type, prd_btw,
+		                         prd_kantineprijs_leden, prd_kantineprijs_extern, 
+		                         prd_borrelmarge, prd_leverancier_id, 
+		                         prd_embalageprijs 
+		                  FROM tblproduct WHERE prd_verwijderd = 0 AND prd_id = %s""")
+		q_prod.run((prd_id,))
+		rows_prod = q_prod.rows()
+		
+		q_rel = Query("""SELECT prdrel_orig_prd_id, prdrel_rel_prd_id
+		                        prdrel_aantal
+		                 FROM tblproductrelation
+		                 WHERE prd_id = %s""")
+		q_rel.run((prd_id,))
+		rows_rel = q_rel.rows()
+	except DatabaseError:
+		raise InternalServerError
+	
+	return _convert_product_rows(rows_prod, rows_rel)
+
+def handle_product(params, json_data):
+	try:
+		q_prod = Query("""SELECT prd_id, prd_naam, prd_type, prd_btw,
+		                         prd_kantineprijs_leden, prd_kantineprijs_extern, 
+		                         prd_borrelmarge, prd_leverancier_id, 
+		                         prd_embalageprijs 
+		                  FROM tblproduct WHERE prd_verwijderd = 0
+		                  ORDER BY prd_id""")
+		q_prod.run()
+		rows_prod = q_prod.rows()
+		
+		q_rel = Query("""SELECT prdrel_orig_prd_id, prdrel_rel_prd_id
+		                        prdrel_aantal
+		                 FROM tblproductrelation""")
+		q_rel.run()
+		rows_rel = q_rel.rows()
+	except DatabaseError:
+		raise InternalServerError
+	
+	return _convert_product_rows(rows_prod, rows_rel)
 
 add_handler('/product/kantine', handle_kantine)
 add_handler('/product', handle_product)
