@@ -56,7 +56,7 @@ def _convert_product_rows(rows_prod, rows_rel):
 	
 	return result
 
-def query_product(prd_id)
+def query_product(prd_id):
 	try:
 		q_prod = Query("""SELECT prd_id, prd_naam, prd_type, prd_btw,
 		                         prd_kantineprijs_leden, prd_kantineprijs_extern, 
@@ -69,7 +69,7 @@ def query_product(prd_id)
 		q_rel = Query("""SELECT prdrel_orig_prd_id, prdrel_rel_prd_id
 		                        prdrel_aantal
 		                 FROM tblproductrelation
-		                 WHERE prd_id = %s""")
+		                 WHERE prdrel_orig_prd_id = %s""")
 		q_rel.run((prd_id,))
 		rows_rel = q_rel.rows()
 	except DatabaseError:
