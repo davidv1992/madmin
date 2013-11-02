@@ -57,31 +57,26 @@ def handle_budget_ver(params, json_data):
 	
 	return budget_data
 
-def budget_query_current(budget_id):
+def budget_query(budget_id):
 	try:
-		q = Query('SELECT bdgt_current FROM tblbudget WHERE bdgt_id = %s')
+		q = Query("""SELECT bdgt_id, bdgt_current, bdgt_minimum, bdgt_ver_id
+		             FROM tblbudget
+		             WHERE bdgt_id = %s""")
 		q.run((budget_id,))
-		result = q.rows()
+		rows = q.rows()
 	except DatabaseError:
 		raise InternalServerError
+		
+	result = []
+	for row in rows:
+		result.append({
+			'budget_id': row[0],
+			'vereniging_id': row[3],
+			'minimum': row[2],
+			'current': row[1]
+		})
 	
-	if (len(result) != 1):
-		raise InternalServerError
-	
-	return result[0][0]
-	
-def budget_query_minimum(budget_id):
-	try:
-		q = Query('SELECT bdgt_minimum FROM tblbudget WHERE bdgt_id = %s')
-		q.run((budget_id,))
-		result = q.rows()
-	except DatabaseError:
-		raise InternalServerError
-	
-	if (len(result) != 1):
-		raise InternalServerError
-	
-	return result[0][0]
+	return result
 
 def budget_vereniging_query(vereniging_id):
 	try:
