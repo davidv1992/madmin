@@ -2,6 +2,7 @@ import httplib
 import urllib
 import json
 import config.servercall_config as config
+import sys
 
 # TODO: Figure out how to do server certificate verification
 
@@ -13,6 +14,8 @@ class ServerLoginError(Exception):
 session_key = None
 
 def _build_url(location, urldata):
+	global session_key
+	
 	#Prepare url
 	url = urllib.quote(location)
 	url_has_params = False
@@ -44,7 +47,7 @@ def remote_call(location, urldata=None, jsondata=None):
 		if jsondata is None:
 			conn.request('GET', url)
 		else:
-			conn.request('POST', url, json.dumps(jsondata))
+			conn.request('POST', url, json.dumps(jsondata), {'Content-Type': 'application/json'})
 	
 		response = conn.getresponse()
 		
@@ -63,6 +66,7 @@ def remote_call(location, urldata=None, jsondata=None):
 		raise ServerCallException
 
 def login(username, password):
+	global session_key
 	session_key = None
 	(succes, key) = remote_call('/login', [('username', username), ('password', password)], None)
 	if not succes:
