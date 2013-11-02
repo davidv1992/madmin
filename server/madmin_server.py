@@ -4,6 +4,7 @@ import ssl
 import urlparse
 import string
 import json
+import cgi
 
 log = logging.getLogger(__name__)
 
@@ -34,15 +35,15 @@ class _MadminRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 	def log_message(self, format, *args):
 		log.info(format, *args)
 	
-	def is_valid_contentlength(content_lenght):
-		if cl > 0 and cl < 1024*1024:
+	def is_valid_contentlength(self, content_lenght):
+		if content_lenght > 0 and content_lenght < 1024*1024:
 			return True
 		return False
 	
 	def process_request_body(self):
 		ct = cgi.parse_header(self.headers.getheader('Content-Type'))[0]
 		cl = int(self.headers.getheader('Content-Length'))
-		if not is_valid_contentlength(cl):
+		if not self.is_valid_contentlength(cl):
 			send_error(400, "Invalid Content-Length")
 			log.info("Request errored on invalid content-length")
 			raise InvalidRequestException
