@@ -64,7 +64,10 @@ def _verify_session(ip, session_key):
 def hasPermission(query_params, data_type, data_owner):
 	#partial STUB!
 	if ('session_key' not in query_params):
+		log.debug('Request without session key')
 		return False
+	
+	log.debug('Request with session key {0}'.format(query_params['session_key'][0]))
 	
 	session_data = _verify_session(query_params['ip'][0], query_params['session_key'][0])
 	
