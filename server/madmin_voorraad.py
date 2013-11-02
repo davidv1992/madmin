@@ -13,7 +13,7 @@ class VoorraadTekortError(Exception):
 def add_voorraad(prd_id, stukprijs, btw, aantal):
 	try:
 		q = Query("""INSERT INTO tblvoorraad (vrd_prd_id, vrd_datum, vrd_aantal, vrd_resterend, vrd_stukprijs, vrd_btw)
-		             VALUES (%s, NOW(), %s, %s, %s, %s)""")
+		             VALUES (%s, CURDATE(), %s, %s, %s, %s)""")
 		q.run((prd_id, aantal, aantal, stukprijs, btw))
 		return q.lastrowid()
 	except DatabaseError:
@@ -72,7 +72,8 @@ def use_voorraad(prd_id, aantal):
 		result.append({
 			'aantal': deel_aantal,
 			'stukprijs': cur_voorraad[i]['stukprijs'],
-			'btw': cur_voorraad[i]['btw']
+			'btw': cur_voorraad[i]['btw'],
+			'id': cur_voorraad[i]['id']
 		})
 		
 		i += 1
@@ -82,8 +83,9 @@ def use_voorraad(prd_id, aantal):
 		q = Query("""UPDATE tblvoorraad SET vrd_resterend = %s WHERE vrd_id = %s""")
 	except DatabaseError:
 		raise InternalServerError
-		
-	while 'gebruikt' in cur_voorraad[i]:
+	
+	i=0	
+	while 'gebruikt' in cur_voorraad[i] and i < len(cur_voorraad):
 		try:
 			q.run((cur_voorraad[i]['resterend'] - cur_voorraad[i]['gebruikt'], cur_voorraad[i]['id']))
 		except DatabaseError:
