@@ -86,9 +86,11 @@ class Query(object):
 				self.cursor.execute(self.querystring)
 			else:
 				self.cursor.execute(self.querystring, parameters)
+			_connection.commit()
 			log.debug("Query %s, rows affected: %d", self.querystring, self.cursor.rowcount)
 		except dbapi.Error, e:
 			log.error("Error during query execution.", exc_info=e)
+			log.error("Query %s", self.querystring)
 			_has_error = True
 			raise DatabaseError
 	
@@ -107,7 +109,7 @@ class Query(object):
 			_has_error = True
 			raise DatabaseError
 	
-	def lastrowid():
+	def lastrowid(self):
 		global _has_error
 		"""
 		Get id of last inserted row
