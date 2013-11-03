@@ -150,10 +150,14 @@ def process_factuur(factuur):
 	
 	log.debug('factuur created with id: %d', fac_id)
 	
-	# Pocess lines
+	# Pocess lines (first inkoop then verkoop)
 	factuur_bedrag = 0
 	for regel in factuur['regels']:
-		factuur_bedrag += process_factuur_regel(regel, fac_id)
+		if regel['aantal'] < 0:
+			factuur_bedrag += process_factuur_regel(regel, fac_id)
+	for regel in factuur['regels']:
+		if regel['aantal'] >= 0:
+			factuur_bedrag += process_factuur_regel(regel, fac_id)
 	
 	# Finish up
 	if saldo_speciaal is not None:
@@ -343,20 +347,27 @@ def verify_factuur(factuur):
 			raise IncompatibleBudgetException(factuur['saldo_speciaal'],
 			                                  factuur['vereniging'])
 	
+	vrd_aantallen = {}
 	for regel in factuur['regels']:
-		verify_factuur_regel(regel)
+		verify_factuur_regel(regel, vrd_aantallen)
+	
+	log.debug("Dump numbers: %s", vrd_aantallen)
+	
+	for prd_id in vrd_aantallen:
+		aantal = vrd_aantallen[prd_id]
+		if ammount_voorraad(prd_id) < aantal:
+			raise NoVoorraadException(product_id = prd_id)
 
-def verify_factuur_regel(regel):
+def verify_factuur_regel(regel, vrd_aantallen):
 	if 'product_id' not in regel:
 		return
 	#check existence
 	if len(query_product(regel['product_id'])) == 0:
 		raise NonExistingProductException(product_id = regel['product_id'])
 	
-	if regel['aantal'] > 0:
-		# check voorraad
-		if ammount_voorraad(regel['product_id']) < regel['aantal']:
-			raise NoVoorraadException(product_id = regel['product_id'], )
+	if regel['product_id'] not in vrd_aantallen:
+		vrd_aantallen[regel['product_id']] = 0
+	vrd_aantallen[regel['product_id']] += regel['aantal']
 
 # ------------------------------------------------------------------------------
 # End of factuur verification
