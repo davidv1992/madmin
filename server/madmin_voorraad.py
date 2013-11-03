@@ -85,7 +85,7 @@ def use_voorraad(prd_id, aantal):
 		raise InternalServerError
 	
 	i=0	
-	while 'gebruikt' in cur_voorraad[i] and i < len(cur_voorraad):
+	while i < len(cur_voorraad) and 'gebruikt' in cur_voorraad[i]:
 		try:
 			q.run((cur_voorraad[i]['resterend'] - cur_voorraad[i]['gebruikt'], cur_voorraad[i]['id']))
 		except DatabaseError:
