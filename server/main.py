@@ -1,6 +1,6 @@
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(filename='/var/www/madmin-log.txt', level=logging.DEBUG)
 
 import madmin_server
 
@@ -15,4 +15,5 @@ import madmin_voorraad
 import madmin_vereniging
 import madmin_factuur
 
-madmin_server.run()
+def handler(req):
+	return madmin_server.handler(req)	#Pass requests through to madmin_server
