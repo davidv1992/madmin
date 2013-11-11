@@ -1,4 +1,4 @@
 *~
-config/madmin_db.py
+server/config/madmin_db.py
 __pycache__
 *.pyc
