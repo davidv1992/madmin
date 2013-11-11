@@ -17,7 +17,7 @@ def _build_url(location, urldata):
 	global session_key
 	
 	#Prepare url
-	url = urllib.quote(location)
+	url = urllib.quote(config.server_prefix + location)
 	url_has_params = False
 	
 	if urldata is not None:

@@ -20,6 +20,7 @@ class InternalServerError(Exception):
 _action_table = {}
 
 def add_handler(target, handler):
+	target = config.prefix+target
 	if target in _action_table:
 		raise AlreadyHandledError
 	_action_table[target] = handler
