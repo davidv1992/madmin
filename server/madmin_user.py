@@ -64,8 +64,6 @@ def _create_session(ip, user):
 		qu.run((session_key, config.timeout, user, ip))
 	except DatabaseError:
 		raise InternalServerError
-		
-	_reset_flood_protect(ip)
 	
 	return session_key
 
