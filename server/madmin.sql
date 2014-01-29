@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 11, 2013 at 06:44 PM
+-- Generation Time: Feb 04, 2014 at 09:21 AM
 -- Server version: 5.5.34-0ubuntu0.13.04.1
--- PHP Version: 5.4.9-4ubuntu2.3
+-- PHP Version: 5.4.9-4ubuntu2.4
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -107,6 +107,19 @@ CREATE TABLE IF NOT EXISTS `tblfactuurregel` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tblfloodcontrol`
+--
+
+CREATE TABLE IF NOT EXISTS `tblfloodcontrol` (
+  `fc_ip` varchar(512) NOT NULL,
+  `fc_ammount` int(11) NOT NULL,
+  `fc_timelim` datetime NOT NULL,
+  PRIMARY KEY (`fc_ip`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `tblgebruiker`
 --
 
@@ -178,6 +191,21 @@ CREATE TABLE IF NOT EXISTS `tblproductrelation` (
   `prdrel_rel_prd_id` int(11) NOT NULL,
   `prdrel_aantal` int(11) NOT NULL,
   PRIMARY KEY (`prdrel_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tblsession`
+--
+
+CREATE TABLE IF NOT EXISTS `tblsession` (
+  `ses_id` varchar(256) NOT NULL,
+  `ses_timelim` datetime NOT NULL,
+  `ses_gebr_id` int(11) NOT NULL,
+  `ses_ip` varchar(512) NOT NULL,
+  PRIMARY KEY (`ses_id`),
+  UNIQUE KEY `ses_id` (`ses_id`,`ses_ip`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
