@@ -515,6 +515,99 @@ def parse_factuur(factuur):
 # End of factuur parsing
 # ------------------------------------------------------------------------------
 
+def convert_factuur_rows(params, regels):
+	if len(regels) == 0:
+		return []
+	result = []
+	for i in range(0, len(regels)):
+		if not hasPermission(params, 'factuur', regels[i][4]):
+			continue
+		
+		if len(result) == 0 or result[-1]['id'] != regels[i][0]:
+			huidige_factuur = {
+				'id': regels[i][0],
+				'type': policy.factuur_name_mapping[regels[i][2]],
+				'volgnummer': regels[i][5],
+				'factuurdatum': str(regels[i][6]),
+				'leverdatum': str(regels[i][7]),
+				'regels': []
+			}
+		
+			if regels[0][10] is not None:
+				huidige_factuur['saldo_basis'] = regels[i][10]
+				huidige_factuur['saldo_basis_na'] = regels[i][12]
+		
+			if regels[0][3] is not None:
+				huidige_factuur['vereniging'] = regels[i][3]
+		
+			if regels[0][4] is not None:
+				huidige_factuur['leverancier'] = regels[i][4]
+		
+			if regels[0][8] is not None:
+				huidige_factuur['verantwoordelijke'] = regels[i][8]
+		
+			if regels[0][9] is not None:
+				huidige_factuur['saldo_speciaal'] = regels[i][9]
+				huidige_factuur['saldo_speciaal_na'] = regels[i][11]
+			
+			result.append(huidige_factuur)
+		
+		if regels[i][13] is None:
+			continue
+				
+		huidige_regel = {
+			'aantal': regels[i][16],
+			'stukprijs': regels[i][17],
+			'totaalprijs': regels[i][18],
+			'btw': regels[i][19]
+		}
+		
+		if regels[i][14] is not None:
+			huidige_regel['naam'] = regels[i][14]
+		
+		if regels[i][15] is not None:
+			huidige_regel['naam'] = regels[i][15]
+		
+		if regels[i][20] is not None:
+			huidige_regel['prd_id'] = regels[i][20]
+		
+		result[-1]['regels'].append(huidige_regel)
+	
+	return result
+
+def handle_factuur_vereniging(params, json_data):
+	if 'vereniging_id' not in params:
+		return None
+	
+	try:
+		q = Query("""SELECT fac_id, fac_cor_op_id, fac_type, fac_ver_id,
+		             fac_leverancier, fac_volgnummer, fac_factuurdatum, 
+		             fac_leverdatum, fac_verantwoordelijke, fac_saldo_speciaal,
+		             fac_saldo_basis, fac_saldo_speciaal_na, fac_saldo_basis_na,
+		             frgl_type, prd_naam, frgl_omschrijving, frgl_aantal,
+		             frgl_stukprijs, frgl_totprijs, frgl_btw, vrd_prd_id
+		             FROM tblfactuur
+		             LEFT JOIN tblfactuurregel ON fac_id = frgl_fac_id
+		             LEFT JOIN tblvoorraad on frgl_vrd_id = vrd_id
+		             LEFT JOIN tblproduct on vrd_prd_id = prd_id
+		             WHERE fac_ver_id = %s
+		             ORDER BY fac_id""")
+	except DatabaseError:
+		raise InternalServerError
+	
+	result = []
+	
+	for ver_id in params['vereniging_id']:
+		try:
+			q.run((ver_id,))
+			regels = q.rows()
+		except DatabaseError:
+			raise InternalServerError
+		
+		result.extend(convert_factuur_rows(params, regels))
+	
+	return result
+
 def handle_factuur(params, json_data):
 	if 'factuur_id' not in params:
 		return None
@@ -526,11 +619,12 @@ def handle_factuur(params, json_data):
 		             fac_saldo_basis, fac_saldo_speciaal_na, fac_saldo_basis_na,
 		             frgl_type, prd_naam, frgl_omschrijving, frgl_aantal,
 		             frgl_stukprijs, frgl_totprijs, frgl_btw, vrd_prd_id
-		             FORM tblfactuur
+		             FROM tblfactuur
 		             LEFT JOIN tblfactuurregel ON fac_id = frgl_fac_id
 		             LEFT JOIN tblvoorraad on frgl_vrd_id = vrd_id
 		             LEFT JOIN tblproduct on vrd_prd_id = prd_id
-		             WHERE fac_id = %s""")
+		             WHERE fac_id = %s
+		             ORDER BY fac_id""")
 	except DatabaseError:
 		raise InternalServerError
 	
@@ -543,61 +637,7 @@ def handle_factuur(params, json_data):
 		except DatabaseError:
 			raise InternalServerError
 		
-		if len(regels) == 0:	#Non-existing factuur
-			continue
-		
-		if not hasPermission(params, 'factuur', regels[0][4]):
-			continue
-		
-		huidige_factuur = {
-			'id': regels[0][0],
-			'type': policy.factuur_name_mapping[regels[0][2]],
-			'volgnummer': regels[0][5],
-			'factuurdatum': str(regels[0][6]),
-			'leverdatum': str(regels[0][7]),
-			'regels': []
-		}
-		
-		if regels[0][10] is not None:
-			huidige_factuur['saldo_basis'] = regels[0][10]
-			huidige_factuur['saldo_basis_na'] = regels[0][12]
-		
-		if regels[0][3] is not None:
-			huidige_factuur['vereniging'] = regels[0][3]
-		
-		if regels[0][4] is not None:
-			huidige_factuur['leverancier'] = regels[0][4]
-		
-		if regels[0][8] is not None:
-			huidige_factuur['verantwoordelijke'] = regels[0][8]
-		
-		if regels[0][9] is not None:
-			huidige_factuur['saldo_speciaal'] = regels[0][9]
-			huidige_factuur['saldo_speciaal_na'] = regels[0][11]
-		
-		for regel in regels:
-			if regel[13] is None:
-				continue
-				
-			huidige_regel = {
-				'aantal': regel[16],
-				'stukprijs': regel[17],
-				'totaalprijs': regel[18],
-				'btw': regel[19]
-			}
-			
-			if regel[14] is not None:
-				huidige_regel['naam'] = regel[14]
-			
-			if regel[15] is not None:
-				huidige_regel['naam'] = regel[15]
-			
-			if regel[20] is not None:
-				huidige_regel['prd_id'] = regel[20]
-			
-			huidige_factuur['regels'].append(huidige_regel)
-		
-		result.append(huidige_factuur)
+		result.extend(convert_factuur_rows(params, regels))
 	
 	return result
 
@@ -605,4 +645,5 @@ def handle_factuur(params, json_data):
 
 add_handler('/factuur', handle_factuur)
 add_handler('/factuur/create', handle_factuur_create)
+add_handler('/factuur/vereniging', handle_factuur_vereniging)
 log.info("Factuur module initialized.")
