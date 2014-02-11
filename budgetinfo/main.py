@@ -5,6 +5,7 @@ import getpass
 import sys
 
 import client_lib.servercall as servercall
+from client_lib.login import prompt_login
 
 #command line parsing
 cmd_parser = argparse.ArgumentParser(description='Vraag budgetinformatie op voor 1 of meer verenigingen')
@@ -31,15 +32,12 @@ cmd_parser.add_argument(
 arguments = cmd_parser.parse_args()
 
 # login
-password = getpass.getpass()
+prompt_login(arguments.user)
+
 try:
-	servercall.login(arguments.user, password)
 	verenigingen = servercall.remote_call('/verenigingen')
 except servercall.ServerCallException:
 	print >> sys.stderr, 'Kon geen verbinding opbouwen met madmin server.'
-	sys.exit(1)
-except servercall.ServerLoginError:
-	print >> sys.stderr, 'Kon niet inloggen met gegeven gebruikersnaam/wachtwoord.'
 	sys.exit(1)
 
 if arguments.all:
