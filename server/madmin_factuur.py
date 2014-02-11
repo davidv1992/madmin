@@ -575,6 +575,27 @@ def convert_factuur_rows(params, regels):
 	
 	return result
 
+def handle_factuur_leverancier(params, json_data):
+	try:
+		q = Query("""SELECT fac_id, fac_cor_op_id, fac_type, fac_ver_id,
+		             fac_leverancier, fac_volgnummer, fac_factuurdatum, 
+		             fac_leverdatum, fac_verantwoordelijke, fac_saldo_speciaal,
+		             fac_saldo_basis, fac_saldo_speciaal_na, fac_saldo_basis_na,
+		             frgl_type, prd_naam, frgl_omschrijving, frgl_aantal,
+		             frgl_stukprijs, frgl_totprijs, frgl_btw, vrd_prd_id
+		             FROM tblfactuur
+		             LEFT JOIN tblfactuurregel ON fac_id = frgl_fac_id
+		             LEFT JOIN tblvoorraad on frgl_vrd_id = vrd_id
+		             LEFT JOIN tblproduct on vrd_prd_id = prd_id
+		             WHERE fac_ver_id IS NULL
+		             ORDER BY fac_id""")
+		q.run()
+		regels = q.rows()
+	except DatabaseError:
+		raise InternalServerError
+	
+	return convert_factuur_rows(params, regels)
+
 def handle_factuur_vereniging(params, json_data):
 	if 'vereniging_id' not in params:
 		return None
@@ -646,4 +667,5 @@ def handle_factuur(params, json_data):
 add_handler('/factuur', handle_factuur)
 add_handler('/factuur/create', handle_factuur_create)
 add_handler('/factuur/vereniging', handle_factuur_vereniging)
+add_handler('/factuur/leverancier', handle_factuur_leverancier)
 log.info("Factuur module initialized.")
