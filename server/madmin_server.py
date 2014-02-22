@@ -60,7 +60,7 @@ def handler(req):
 		extra_params, json_data = {},None
 	
 	params.update(extra_params)
-	params['ip'] = req.connection.remote_ip
+	params['ip'] = [req.connection.remote_ip,]
 	
 	try:
 		response = _action_table[req.uri](params,json_data)
