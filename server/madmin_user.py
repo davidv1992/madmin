@@ -32,6 +32,8 @@ def _check_flood_protect(ip):
 
 def _add_flood_protect(ip):
 	try:
+		qr = Query('DELETE FROM tblfloodcontrol WHERE fc_timelim < NOW()')
+		qr.run()
 		q = Query('SELECT fc_ip FROM tblfloodcontrol WHERE fc_ip = %s')
 		q.run((ip,))
 		rows = q.rows()
@@ -45,15 +47,6 @@ def _add_flood_protect(ip):
 		raise InternalServerError
 	# Failing is best here, as someone could try to selectively block access
 	#  to database so as to be able to run a brute-force attack on passwords
-
-def _reset_flood_protect(ip):
-	try:
-		q = Query('DELETE FROM tblfloodprotect WHERE fc_ip = %s OR fc_timelim < NOW()')
-		q.run((ip,))
-	except DatabaseError:
-		pass
-	# Silent ignore is best here, as a failure is not critical to further processing
-	#  of the request, and does not degrade security
 
 def _create_session(ip, user):
 	session_key = b64encode(urandom(8))
