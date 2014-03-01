@@ -36,7 +36,7 @@ def handle_budget(params, json_data):
 	
 	return budget_data
 
-def handle_budget_ver(params, json_data):
+def handle_budget_vereniging(params, json_data):
 	if 'vereniging_id' not in params:
 		return []
 	
@@ -111,5 +111,5 @@ def budget_update(budget_id, value_change):
 		raise InternalServerError
 
 add_handler('/budget', handle_budget)
-add_handler('/budget/ver', handle_budget_ver)
+add_handler('/budget/vereniging', handle_budget_vereniging)
 log.info("Budget module initialized")

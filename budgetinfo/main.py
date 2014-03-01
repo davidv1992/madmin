@@ -43,9 +43,9 @@ except servercall.ServerCallException:
 if arguments.all:
 	for vereniging in verenigingen:
 		try:
-			budgetten = servercall.remote_call('/budget/ver', [('vereniging_id', vereniging['id'])])
+			budgetten = servercall.remote_call('/budget/vereniging', [('vereniging_id', vereniging['id'])])
 		except servercall.ServerCallException:
-			print >> sys.stderr, 'Kon geen verbinding opbouwen met madmin server'
+			print >> sys.stderr, 'Kon geen verbinding opbouwen met madmin server.2'
 			sys.exit(1)
 		print '{0}:'.format(vereniging['naam'])
 		for budget in budgetten:
@@ -62,9 +62,9 @@ for vereniging in arguments.verenigingen:
 		print >> sys.stderr, 'Vereniging {0} bestaat niet.'.format(vereniging)
 		continue
 	try:
-		budgetten = servercall.remote_call('/budget/ver', [('vereniging_id', selection[0]['id'])])
+		budgetten = servercall.remote_call('/budget/vereniging', [('vereniging_id', selection[0]['id'])])
 	except servercall.ServerCallException:
-		print >> sys.stderr, 'Kon geen verbinding opbouwen met madmin server'
+		print >> sys.stderr, 'Kon geen verbinding opbouwen met madmin server.3'
 		sys.exit(1)
 	print '{0}:'.format(vereniging)
 	for budget in budgetten:
