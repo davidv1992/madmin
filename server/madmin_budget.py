@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 def handle_budget(params, json_data):
 	if 'budget_id' not in params:
-		return None
+		return []
 
 	budget_data = []	
 	try:
@@ -38,7 +38,7 @@ def handle_budget(params, json_data):
 
 def handle_budget_ver(params, json_data):
 	if 'vereniging_id' not in params:
-		return None
+		return []
 	
 	try:
 		q = Query('SELECT bdgt_id, bdgt_naam, bdgt_minimum, bdgt_current FROM tblbudget WHERE bdgt_ver_id = %s')
