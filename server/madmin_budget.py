@@ -27,7 +27,12 @@ def handle_budget(params, json_data):
 			if not hasPermission(params, 'budget', row[4]):
 				continue
 			
-			budget_data.append({'id': row[0], 'naam': row[1], 'current': row[3], 'minimum': row[2]})
+			budget_data.append({
+				'id': row[0], 
+				'vereniging_id': row[4], 
+				'naam': row[1], 
+				'current': row[3], 
+				'minimum': row[2]})
 	
 	return budget_data
 
@@ -53,7 +58,12 @@ def handle_budget_ver(params, json_data):
 			raise InternalServerError
 		
 		for row in cur_result:
-			budget_data.append({'id': row[0], 'naam': row[1], 'current': row[3], 'minimum': row[2]})
+			budget_data.append({
+				'id': row[0], 
+				'vereniging_id': vereniging_id, 
+				'naam': row[1], 
+				'current': row[3], 
+				'minimum': row[2]})
 	
 	return budget_data
 
