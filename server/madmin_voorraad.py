@@ -102,9 +102,9 @@ def _convert_datum(voorraad_el):
 
 def handle_voorraad(params, json_data):
 	if 'product_id' not in params:
-		return None
+		return []
 	if not hasPermission(params, 'voorraad', None):
-		return None
+		return []
 	
 	result = []
 	for prd_id in params['product_id']:
