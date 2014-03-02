@@ -43,8 +43,6 @@ log = logging.getLogger(__name__)
 def handle_factuur_create(params, json_data):
 	log.debug('Start factuur_create')
 	log.debug('Input data:%s', json_data)
-	if type(json_data) != list:
-		return {'error': 'incorrectly structured data'}
 	
 	if not hasPermission(params,'factuur_create',None):
 		return {'error': 'insufficient permissions'}
@@ -54,9 +52,7 @@ def handle_factuur_create(params, json_data):
 	#Start transaction
 	
 	try:
-		for factuur in json_data:
-			facturen.append(parse_factuur(factuur))
-				
+		facturen.append(parse_factuur(json_data))
 	except MalformedDataException:
 		return {'error': 'incorrectly structured data'}
 	
