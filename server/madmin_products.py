@@ -77,20 +77,21 @@ def query_product(prd_id):
 	
 	return _convert_product_rows(rows_prod, rows_rel)
 
-def handle_product(params, json_data):
+def handle_product_all(params, json_data):
 	try:
 		q_prod = Query("""SELECT prd_id, prd_naam, prd_type, prd_btw,
 		                         prd_kantineprijs_leden, prd_kantineprijs_extern, 
 		                         prd_borrelmarge, prd_leverancier_id, 
 		                         prd_embalageprijs 
-		                  FROM tblproduct WHERE prd_verwijderd = 0
+		                  FROM tblproduct WHERE prd_verwijderd = 0 
 		                  ORDER BY prd_id""")
 		q_prod.run()
 		rows_prod = q_prod.rows()
 		
-		q_rel = Query("""SELECT prdrel_orig_prd_id, prdrel_rel_prd_id
+		q_rel = Query("""SELECT prdrel_orig_prd_id, prdrel_rel_prd_id,
 		                        prdrel_aantal
-		                 FROM tblproductrelation""")
+		                 FROM tblproductrelation
+		                 ORDER BY prdrel_orig_prd_id""")
 		q_rel.run()
 		rows_rel = q_rel.rows()
 	except DatabaseError:
@@ -98,6 +99,43 @@ def handle_product(params, json_data):
 	
 	return _convert_product_rows(rows_prod, rows_rel)
 
+def handle_product(params, json_data):
+	if 'product_id' not in params:
+		return []
+	
+	result = []
+	
+	try:	
+		q_prod = Query("""SELECT prd_id, prd_naam, prd_type, prd_btw,
+				                 prd_kantineprijs_leden, prd_kantineprijs_extern, 
+				                 prd_borrelmarge, prd_leverancier_id, 
+				                 prd_embalageprijs 
+				          FROM tblproduct WHERE prd_verwijderd = 0
+				          AND prd_id = %s
+				          ORDER BY prd_id""")
+		q_rel = Query("""SELECT prdrel_orig_prd_id, prdrel_rel_prd_id,
+			                    prdrel_aantal
+			             FROM tblproductrelation
+			             WHERE prdrel_orig_prd_id = %s
+			             ORDER BY prdrel_orig_prd_id""")
+	except DatabaseError:
+		raise InternalServerError
+	
+	for prd_id in params['product_id']:
+		try:
+			q_prod.run((prd_id,))
+			rows_prod = q_prod.rows()
+		
+			q_rel.run((prd_id,))
+			rows_rel = q_rel.rows()
+		except DatabaseError:
+			raise InternalServerError
+		
+		result += _convert_product_rows(rows_prod, rows_rel)
+	
+	return result
+
 add_handler('/product/kantine', handle_kantine)
+add_handler('/product/all', handle_product_all)
 add_handler('/product', handle_product)
 log.info("Product module initialized.")
