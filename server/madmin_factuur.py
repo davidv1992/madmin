@@ -397,6 +397,9 @@ def parse_factuur_regels(regels):
 		if 'naam' not in regel and 'product_id' not in regel:
 			raise MalformedDataException
 		
+		if 'naam' in regel and 'product_id' in regel:
+			raise MalformedDataException
+		
 		if regel['aantal'] > 0 and 'product_id' in regel and ('stukprijs' in regel or 'totaalprijs' in regel):
 			raise MalformedDataException
 		
