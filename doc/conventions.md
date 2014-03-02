@@ -41,3 +41,7 @@ Handling of BTW ammounts
 ------------------------
 
 Every value that represents the price of an object internally is always the price including BTW.
+
+Representation of incoming goods/outgoing goods
+-----------------------------------------------
+Within facturen the aantal field in a line determines whether it represents inkoop (<0) or verkoop (>0). Bedragen are always positive for regels, and are interpreted as having to be substracted from a saldo when it represents verkoop, and added to it when it represents inkoop.

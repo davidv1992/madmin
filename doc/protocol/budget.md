@@ -25,8 +25,8 @@ Authentication:
 Output JSON:
 	[BUDGET*]
 
-/budget/ver
------------
+/budget/vereniging
+------------------
 Produce budget information for all budgets that belong to a vereniging
 Input Parameters:
 	vereniging_id (1 or more)
