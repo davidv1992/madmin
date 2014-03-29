@@ -56,7 +56,7 @@ def remote_call(location, urldata=None, jsondata=None):
 		if statuscode == 201:
 			return None
 		if statuscode <> 200:
-			raise ServerCallException
+			raise ServerCallException(str(statuscode))
 		returned_data = json.load(response)
 		
 		conn.close()
