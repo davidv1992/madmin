@@ -14,6 +14,8 @@ def intConvert(value):
 def moneyConvert(value):
 	cents = value % 100
 	value /= 100
+	if cents < 10:
+		return str(value)+ ",0" + str(cents)
 	return str(value) + "," + str(cents)
 
 _regelLayout = [
