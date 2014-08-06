@@ -56,7 +56,7 @@ class Container(Widget):
 		return False
 	
 	def offFocus(self):
-		self.children[self.curFocus].offFocus()
+		self.children[self.curFocus][2].offFocus()
 		
 	def keyEvent(self, key):
 		if self.curFocus < len(self.children):
