@@ -27,24 +27,26 @@ def add_handler(target, handler):
 	_action_table[target] = handler
 
 def is_valid_contentlength(content_length):
-	if content_lenght > 0 and content_lenght < 1024*1024:
+	if content_length > 0 and content_length < 1024*1024:
 		return True
 	return False
 
 def process_request_body(req):
 	ct = cgi.parse_header(req.headers_in['Content-Type'])[0]
 	cl = int(req.headers_in['Content-Length'])
+	log.debug("Parsed headers")
 	if not is_valid_contentlength(cl):
 		log.info("Request errored on invalid content-length")
 		raise apache.SERVER_RETURN, apache.HTTP_BAD_REQUEST
 	if ct == 'application/x-www-form-urlencoded':
-		return (urlparse.parse_qs(self.rfile.read(cl)), None)
+		return (urlparse.parse_qs(req.read(cl)), None)
 	if ct == 'application/json':
-		return ({}, json.loads(self.rfile.read(cl)))
+		return ({}, json.loads(req.read(cl)))
 	log.info("Request errored on invalid content-length")
 	raise apache.SERVER_RETURN, apache.HTTP_BAD_REQUEST
 
 def handler(req):
+	log.debug("Request, target %s.", req.uri)
 	if req.uri not in _action_table:
 		log.info("Request ignored, unknown target %s.", req.uri)
 		return apache.HTTP_NOT_FOUND
@@ -54,10 +56,14 @@ def handler(req):
 	else:
 		params = {}
 	
+	log.debug("Parsed params")
+	
 	if 'Content-Type' in req.headers_in and 'Content-Length' in req.headers_in:
 		extra_params, json_data = process_request_body(req)
 	else:
 		extra_params, json_data = {},None
+	
+	log.debug("Parsed body data")
 	
 	params.update(extra_params)
 	params['ip'] = [req.connection.remote_ip,]
