@@ -6,6 +6,13 @@ _WindowWidget = None
 _cursorPos = (0,0)
 _cursorEnabled = False
 
+COLORPAIR_RED = 1
+COLORPAIR_GREEN = 2
+
+def _initColors():
+	curses.init_pair(COLORPAIR_RED, curses.COLOR_RED, curses.COLOR_BLACK)
+	curses.init_pair(COLORPAIR_GREEN, curses.COLOR_GREEN, curses.COLOR_BLACK)
+
 def setCursor(x,y):
 	global _cursorEnabled, _cursorPos
 	_cursorEnabled = True
@@ -39,6 +46,7 @@ def _redraw(stdscr):
 def _mainloop(stdscr):
 	global _stop
 	global _WindowWidget
+	_initColors()
 	_stop = False
 	(height, width) = stdscr.getmaxyx()
 	curses.cbreak()
