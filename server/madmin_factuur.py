@@ -104,9 +104,9 @@ def process_factuur(factuur):
 	
 	# Generate next number for factuur
 	try:
-		q = Query("""SELECT MIN(fac_volgnummer)
+		q = Query("""SELECT MAX(fac_volgnummer)
 		             FROM tblfactuur
-		             WHERE fac_ver_id = %s AND fac_leverancier = %s""")
+		             WHERE fac_ver_id <=> %s AND fac_leverancier <=> %s""")
 		q.run((vereniging, leverancier))
 		rows = q.rows()
 	except DatabaseError:
@@ -380,26 +380,34 @@ def parse_factuur_regels(regels):
 	result = []
 	for regel in regels:
 		if 'aantal' not in regel:
+			log.debug("aantal not present")
 			raise MalformedDataException
 		
 		if type(regel['aantal']) != int:
+			log.debug("aantal wrong type")
 			raise MalformedDataException
 		if regel['aantal'] == 0:
+			log.debug("aantal may not be 0")
 			raise MalformedDataException
 		
 		if regel['aantal'] < 0 and 'stukprijs' not in regel and 'totaalprijs' not in regel:
+			log.debug("no price information present")
 			raise MalformedDataException
 		
 		if 'naam' not in regel and 'product_id' not in regel:
+			log.debug("no line description or product info present")
 			raise MalformedDataException
 		
 		if 'naam' in regel and 'product_id' in regel:
+			log.debug("both name and product id present")
 			raise MalformedDataException
 		
 		if regel['aantal'] > 0 and 'product_id' in regel and ('stukprijs' in regel or 'totaalprijs' in regel):
+			log.debug("too much information present")
 			raise MalformedDataException
 		
 		if 'product_id' not in regel and 'btw' not in regel:
+			log.debug("No btw info known")
 			raise MalformedDataException
 		
 		curRegel = {
@@ -408,28 +416,34 @@ def parse_factuur_regels(regels):
 		
 		if 'stukprijs' in regel:
 			if type(regel['stukprijs']) != int:
+				log.debug("stukprijs wrong type")
 				raise MalformedDataException
 			curRegel['stukprijs'] = regel['stukprijs']
 		
 		if 'totaalprijs' in regel:
 			if 'stukprijs' in regel:
+				log.debug("too much price info")
 				raise MalformedDataException
 			if type(regel['totaalprijs']) != int:
+				log.debug("totaalprijs wrong type")
 				raise MalformedDataException
 			curRegel['totaalrpijs'] = regel['totaalprijs']
 		
 		if 'btw' in regel:
 			if type(regel['btw']) != int:
+				log.debug("btw wrong type")
 				raise MalformedDataException
 			curRegel['btw'] = regel['btw']
 		
 		if 'product_id' in regel:
 			if type(regel['product_id']) != int:
+				log.debug("product_id wrong type")
 				raise MalformedDataException
 			curRegel['product_id'] = regel['product_id']
 		
 		if 'naam' in regel:
 			if not isinstance(regel['naam'], (str,unicode)):
+				log.debug("naam wrong type")
 				raise MalformedDataException
 			curRegel['naam'] = regel['naam']
 		
@@ -439,14 +453,19 @@ def parse_factuur_regels(regels):
 
 def parse_factuur(factuur):
 	if 'type' not in factuur:
+		log.debug("no type given")
 		raise MalformedDataException
 	if 'factuurdatum' not in factuur:
+		log.debug("no factuurdatum given")
 		raise MalformedDataException
 	if 'leverdatum' not in factuur:
+		log.debug("no leverdatum given")
 		raise MalformedDataException
 	if 'regels' not in factuur:
+		log.debug("no regels present")
 		raise MalformedDataException
 	if 'leverancier' not in factuur and 'vereniging' not in factuur:
+		log.debug("no third party given")
 		raise MalformedDataException
 	
 	log.debug('all required fields present')
