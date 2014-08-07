@@ -37,7 +37,7 @@ Input format
 ------------
 Output facturen contain a few cases of duplicate or extra information which, in order to preserve system-wide consistency, MUST NOT be present in input facturen.
 Notes:
- - price information should not be present on verkoop (aantal < 0) when a product id is given.
+ - price information should not be present on verkoop (aantal > 0) when a product id is given.
 FACTUURREGEL_IN := {
 	'aantal': aantal,
 	(('stukprijs': stukprijs) | ('totaalprijs': totaalprijs))?,
