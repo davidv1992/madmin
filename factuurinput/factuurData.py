@@ -2,6 +2,7 @@ from gui_lib.container import Container
 from gui_lib.label import Label
 from gui_lib.textline import Textline
 from gui_lib.fill import Fill
+from gui_lib.optionbox import Optionbox
 from verenigingLine import VerenigingLine
 from budgetLine import BudgetLine
 import datetime
@@ -28,6 +29,11 @@ class FactuurData(Container):
 		self.specialBudgetLabel = Label(0,1,"Speciaal budget")
 		self.specialBudgetValue = BudgetLine(1)
 		
+		self.typeValue = Optionbox(1,1)
+		self.typeValue.addOption('inkoop')
+		self.typeValue.addOption('verkoop')
+		
+		self.typeValueIdx = self.addChild(0,0,self.typeValue)
 		self.otherPartyLabelIdx = self.addChild(0,0,self.otherPartyLabel)
 		self.otherPartyValueIdx = self.addChild(0,0,self.otherPartyValue)
 		self.leverDatumLabelIdx = self.addChild(0,0,self.leverDatumLabel)
@@ -44,6 +50,9 @@ class FactuurData(Container):
 		#  ignore height, selfdetermined
 		self.width = width
 		
+		self.typeValue.resize(width,1)
+		self.setChildPos(self.typeValueIdx, 0,0)
+		
 		if (self.width-1)/2 - self.labelWidth >= self.minValueWidth:
 			#two column layout
 			colWidth = (self.width-1)/2
@@ -51,29 +60,29 @@ class FactuurData(Container):
 			valueWidth = max(0, colWidth - self.labelWidth)
 			
 			self.separatorFill.resize(1,2)
-			self.setChildPos(self.separatorFillIdx, colWidth, 0)
+			self.setChildPos(self.separatorFillIdx, colWidth, 1)
 			
 			self.otherPartyLabel.resize(self.labelWidth, 1)
-			self.setChildPos(self.otherPartyLabelIdx, 0, 0)
+			self.setChildPos(self.otherPartyLabelIdx, 0, 1)
 			self.otherPartyValue.resize(valueWidth, 1)
-			self.setChildPos(self.otherPartyValueIdx, self.labelWidth, 0)
+			self.setChildPos(self.otherPartyValueIdx, self.labelWidth, 1)
 			
 			self.leverDatumLabel.resize(self.labelWidth, 1)
-			self.setChildPos(self.leverDatumLabelIdx, 0, 1)
+			self.setChildPos(self.leverDatumLabelIdx, 0, 2)
 			self.leverDatumValue.resize(valueWidth, 1)
-			self.setChildPos(self.leverDatumValueIdx, self.labelWidth, 1)
+			self.setChildPos(self.leverDatumValueIdx, self.labelWidth, 2)
 			
 			self.verantwoordelijkeLabel.resize(self.labelWidth, 1)
-			self.setChildPos(self.verantwoordelijkeLabelIdx, colOffset, 0)
+			self.setChildPos(self.verantwoordelijkeLabelIdx, colOffset, 1)
 			self.verantwoordelijkeValue.resize(valueWidth, 1)
-			self.setChildPos(self.verantwoordelijkeValueIdx, colOffset + self.labelWidth, 0)
+			self.setChildPos(self.verantwoordelijkeValueIdx, colOffset + self.labelWidth, 1)
 			
 			self.specialBudgetLabel.resize(self.labelWidth, 1)
-			self.setChildPos(self.specialBudgetLabelIdx, colOffset, 1)
+			self.setChildPos(self.specialBudgetLabelIdx, colOffset, 2)
 			self.specialBudgetValue.resize(valueWidth, 1)
-			self.setChildPos(self.specialBudgetValueIdx, colOffset + self.labelWidth, 1)
+			self.setChildPos(self.specialBudgetValueIdx, colOffset + self.labelWidth, 2)
 			
-			self.height = 2
+			self.height = 3
 		else:
 			valueWidth = max(0, self.width - self.labelWidth)
 			
@@ -81,26 +90,26 @@ class FactuurData(Container):
 			self.setChildPos(self.separatorFillIdx, 0,0)
 			
 			self.otherPartyLabel.resize(self.labelWidth, 1)
-			self.setChildPos(self.otherPartyLabelIdx, 0, 0)
+			self.setChildPos(self.otherPartyLabelIdx, 0, 1)
 			self.otherPartyValue.resize(valueWidth, 1)
-			self.setChildPos(self.otherPartyValueIdx, self.labelWidth, 0)
+			self.setChildPos(self.otherPartyValueIdx, self.labelWidth, 1)
 			
 			self.leverDatumLabel.resize(self.labelWidth, 1)
-			self.setChildPos(self.leverDatumLabelIdx, 0, 1)
+			self.setChildPos(self.leverDatumLabelIdx, 0, 2)
 			self.leverDatumValue.resize(valueWidth, 1)
-			self.setChildPos(self.leverDatumValueIdx, self.labelWidth, 1)
+			self.setChildPos(self.leverDatumValueIdx, self.labelWidth, 2)
 			
 			self.verantwoordelijkeLabel.resize(self.labelWidth, 1)
-			self.setChildPos(self.verantwoordelijkeLabelIdx, 0, 2)
+			self.setChildPos(self.verantwoordelijkeLabelIdx, 0, 3)
 			self.verantwoordelijkeValue.resize(valueWidth, 1)
-			self.setChildPos(self.verantwoordelijkeValueIdx, self.labelWidth, 2)
+			self.setChildPos(self.verantwoordelijkeValueIdx, self.labelWidth, 3)
 			
 			self.specialBudgetLabel.resize(self.labelWidth, 1)
-			self.setChildPos(self.specialBudgetLabelIdx, 0, 3)
+			self.setChildPos(self.specialBudgetLabelIdx, 0, 4)
 			self.specialBudgetValue.resize(valueWidth, 1)
-			self.setChildPos(self.specialBudgetValueIdx, self.labelWidth, 3)
+			self.setChildPos(self.specialBudgetValueIdx, self.labelWidth, 4)
 			
-			self.height = 4
+			self.height = 5
 	
 	def generateFactuur(self):
 		if self.otherPartyValue.text == "":
@@ -115,7 +124,7 @@ class FactuurData(Container):
 		
 		result = {}
 		
-		result['type'] = 'inkoop'
+		result['type'] = self.typeValue.text
 		
 		if self.otherPartyValue.currentID is not None:
 			result['vereniging'] = self.otherPartyValue.currentID
