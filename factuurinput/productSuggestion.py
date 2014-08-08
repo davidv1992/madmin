@@ -1,10 +1,15 @@
 from client_lib.servercall import remote_call
 
+_isInitialized = False
 _productList = None
 _productNameList = []
 _productNumberList = []
 
 def _prodSugInit():
+	global _isInitialized
+	global _productList
+	global _productNameList
+	global _productNumberList
 	_productList = remote_call('/product/all')
 	
 	# Build product name and number lists
@@ -13,9 +18,14 @@ def _prodSugInit():
 		_productNumberList.append((product['leverancier_id'].encode('utf-8'), product['id']))
 	_productNameList.sort()
 	_productNumberList.sort()
+	
+	_isInitialized = True
 
 def findSuggestion(curInput):
-	if _productList == None:
+	global _isInitialized
+	global _productNameList
+	global _productNumberList
+	if not _isInitialized:
 		_prodSugInit()
 	
 	low = -1

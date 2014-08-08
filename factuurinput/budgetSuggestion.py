@@ -1,18 +1,28 @@
 from client_lib.servercall import remote_call
 
+_isInitialized = False
 _budgetList = None
 _budgetNameList = []
 
 def _budgetSugInit():
+	global _isInitialized
+	global _budgetList
+	global _budgetNameList
 	_verenigingList = remote_call('/verenigingen')
 	_budgetList = []
 	for vereniging in _verenigingList:
 		_budgetList = remote_call('/budget/vereniging', [('vereniging_id', vereniging['id'])])
 		for budget in _budgetList:
 			_budgetNameList.append((vereniging['naam'].encode('utf-8') + '-' + budget['naam'].encode('utf-8'), budget['id']))
+	
+	_budgetNameList.sort()
+	
+	_isInitialized = True
 
 def findBudget(curInput):
-	if _budgetList is None:
+	global _isInitialized
+	global _budgetNameList
+	if not _isInitialized:
 		_budgetSugInit()
 	
 	if len(_budgetNameList) == 0:
