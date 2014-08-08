@@ -69,7 +69,7 @@ def handle_budget_vereniging(params, json_data):
 
 def budget_query(budget_id):
 	try:
-		q = Query("""SELECT bdgt_id, bdgt_current, bdgt_minimum, bdgt_ver_id
+		q = Query("""SELECT bdgt_id, bdgt_current, bdgt_minimum, bdgt_ver_id, bdgt_naam
 		             FROM tblbudget
 		             WHERE bdgt_id = %s""")
 		q.run((budget_id,))
@@ -83,7 +83,8 @@ def budget_query(budget_id):
 			'budget_id': row[0],
 			'vereniging_id': row[3],
 			'minimum': row[2],
-			'current': row[1]
+			'current': row[1],
+			'naam': row[4]
 		})
 	
 	return result

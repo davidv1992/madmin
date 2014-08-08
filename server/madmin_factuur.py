@@ -7,6 +7,7 @@ from madmin_user import hasPermission
 from madmin_voorraad import add_voorraad, use_voorraad, ammount_voorraad
 from madmin_products import query_product
 from madmin_vereniging import query_vereniging
+from madmin_budget import budget_query, budget_update
 import policy.madmin_factuur as policy
 
 class MalformedDataException(Exception):
@@ -59,8 +60,8 @@ def handle_factuur_create(params, json_data):
 	try:
 		for factuur in facturen:
 			verify_factuur(factuur)
-			process_factuur(factuur)
-			policy.process_factuur(factuur)
+			fac_id = process_factuur(factuur)
+			policy.process_factuur(factuur, fac_id)
 	except NonExistingProductException, e:
 		return {'error': 'No such product {0}'.format(e.product_id), 'product_id': e.product_id}
 	except NonExistingVerenigingException, e:
@@ -116,6 +117,8 @@ def process_factuur(factuur):
 	else:
 		number = rows[0][0] + 1
 	
+	factuur['volgnummer'] = number
+	
 	# Create factuur entry
 	try:
 		q = Query("""INSERT INTO tblfactuur (fac_ver_id, 
@@ -148,23 +151,26 @@ def process_factuur(factuur):
 	
 	# Pocess lines (first inkoop then verkoop)
 	factuur_bedrag = 0
+	regels_processed = []
 	for regel in factuur['regels']:
 		if regel['aantal'] < 0:
-			factuur_bedrag += process_factuur_regel(regel, fac_id)
+			factuur_bedrag += process_factuur_regel(regel, fac_id, regels_processed)
 	for regel in factuur['regels']:
 		if regel['aantal'] >= 0:
-			factuur_bedrag += process_factuur_regel(regel, fac_id)
+			factuur_bedrag += process_factuur_regel(regel, fac_id, regels_processed)
+	
+	factuur['regels'] = regels_processed
 	
 	# Finish up
 	if saldo_speciaal is not None:
-		budget_speciaal = query_budget(saldo_speciaal)[0]
+		budget_speciaal = budget_query(saldo_speciaal)[0]
 		mutatie_speciaal = max(factuur_bedrag, 
 		               budget_speciaal['minimum'] - budget_speciaal['current'])
 		mutatie_basis = factuur_bedrag - mutatie_speciaal
 		budget_update(saldo_speciaal, mutatie_speciaal)
 		budget_update(saldo_basis, mutatie_basis)
-		budget_speciaal = query_budget(saldo_speciaal)[0]
-		budget_basis = query_budget(saldo_basis)[0]
+		budget_speciaal = budget_query(saldo_speciaal)[0]
+		budget_basis = budget_query(saldo_basis)[0]
 		try:
 			q = Query("""UPDATE tblfactuur SET saldo_speciaal_na = %s
 			                                   saldo_basis_na = %s
@@ -174,15 +180,17 @@ def process_factuur(factuur):
 			raise InternalServerError
 	elif saldo_basis is not None:
 		budget_update(saldo_basis, factuur_bedrag)
-		budget_basis = query_budget(saldo_basis)[0]
+		budget_basis = budget_query(saldo_basis)[0]
 		try:
-			q = Query("""UPDATE tblfactuur SET saldo_basis_na = %s
+			q = Query("""UPDATE tblfactuur SET fac_saldo_basis_na = %s
 			                               WHERE fac_id = %s""")
 			q.run((budget_basis['current'], fac_id))
 		except DatabaseError:
 			raise InternalServerError
+	
+	return fac_id
 
-def process_factuur_regel_inkoop(regel, factuur_id):
+def process_factuur_regel_inkoop(regel, factuur_id, regels_processed):
 	if 'product_id' in regel:
 		product = query_product(regel['product_id'])[0]
 		
@@ -216,6 +224,8 @@ def process_factuur_regel_inkoop(regel, factuur_id):
 			       regel['totaalprijs'], btw))
 		except DatabaseError:
 			raise InternalServerError
+		
+		regels_processed.append(regel)
 			
 		return regel['totaalprijs']
 	else:
@@ -247,9 +257,10 @@ def process_factuur_regel_inkoop(regel, factuur_id):
 			       btw))
 		except DatabaseError:
 			raise InternalServerError
+		regels_processed.append(regel)
 		return regel['totaalprijs']
 
-def process_factuur_regel_verkoop(regel, factuur_id):
+def process_factuur_regel_verkoop(regel, factuur_id, regels_processed):
 	if 'product_id' in regel:
 		verbruik = use_voorraad(regel['product_id'], regel['aantal'])
 		try:
@@ -275,6 +286,10 @@ def process_factuur_regel_verkoop(regel, factuur_id):
 				       vc['stukprijs'], totaalprijs, btw))
 			except DatabaseError:
 				raise InternalServerError
+			regels_processed.append({'product_id': regel['product_id'],
+									'aantal': vc['aantal'],
+									'stukprijs': vc['stukprijs'],
+									'totaalprijs': totaalprijs})
 			c_totaalprijs += totaalprijs
 			
 		return c_totaalprijs
@@ -308,14 +323,15 @@ def process_factuur_regel_verkoop(regel, factuur_id):
 			       regel['btw']))
 		except DatabaseError:
 			raise InternalServerError
-		
+			
+		regels_processed.append(regel)
 		return regel['totaalprijs']
 
-def process_factuur_regel(regel, factuur_id):
+def process_factuur_regel(regel, factuur_id, regels_processed):
 	if regel['aantal'] > 0:
-		return -process_factuur_regel_verkoop(regel, factuur_id)
+		return -process_factuur_regel_verkoop(regel, factuur_id, regels_processed)
 	else:
-		return process_factuur_regel_inkoop(regel, factuur_id)
+		return process_factuur_regel_inkoop(regel, factuur_id, regels_processed)
 
 # ------------------------------------------------------------------------------
 # End of factuur processing

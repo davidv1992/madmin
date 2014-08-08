@@ -18,7 +18,7 @@ def query_vereniging(ver_id):
 	
 	ver_overview = []
 	
-	for row in rows:
+	for row in result:
 		
 		ver_overview.append({
 			'id': row[0],
