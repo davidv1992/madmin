@@ -1,6 +1,10 @@
 from madmin_products import query_product
 from madmin_vereniging import query_vereniging
 from madmin_budget import budget_query
+from os import system
+from smtplib import SMTP
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
 
 #factuur types
 factuur_type_inkoop  = 1
@@ -17,6 +21,7 @@ factuur_type_mapping = {
 }
 
 factuur_pdf_dir = '/var/www/facturen/'
+factuur_sender = ''
 
 template = R"""
 \documentclass[a4paper]{article}
@@ -133,10 +138,31 @@ def process_factuur(factuur, fac_id):
 	texCode = template % info
 	
 	texFilename = factuur_pdf_dir + "factuur" + str(fac_id) + ".tex"
+	pdfFilename = factuur_pdf_dir + "factuur" + str(fac_id) + ".pdf"
 	
 	texfile = open(texFilename, "w")
 	texfile.write(texCode)
 	texfile.close()
 	
+	if system("pdflatex " + texFilename) <> 0:
+		return
 	
+	pdfFile = open(pdfFilename, "rb"
+	pdfAttachment = MIMEApplication(pdfFile.read())
+	pdfFile.close()
+	pdfAttachment.add_header('Content-Disposition', 'attachment', filename=pdfFilename)
 	
+	emailText = MIMEText("Dit is een automatisch gegenereerde mail met de laatste factuur.", 'plain')
+	
+	receiver = query_vereniging(factuur['vereniging'])[0]['email']
+	
+	email = MIMEMultipart()
+	email['Subject'] = "Madmin factuur"
+	email['To'] = receiver
+	email['From'] = factuur_sender
+	email.attach(emailText)
+	email.attach(pdfAttachment)
+	
+	s = SMTP()
+	s.sendmail(factuur_sender, receiver, email.as_string())
+	s.quit()
