@@ -79,6 +79,17 @@ def _verify_session(ip, session_key):
 	
 	return rows[0][0]
 
+def getLoginId(query_params):
+	if ('session_key' not in query_params):
+		return None
+	
+	gebr_id = _verify_session(query_params['ip'][0], query_params['session_key'][0])
+	
+	if not gebr_id:
+		return None
+	
+	return gebr_id
+
 def hasPermission(query_params, data_type, data_owner):
 	#partial STUB!
 	if ('session_key' not in query_params):
@@ -91,6 +102,61 @@ def hasPermission(query_params, data_type, data_owner):
 	
 	if not session_data:
 		return False
+	
+	return True
+
+def handle_users(params, json_data):
+	if not hasPermission(params, "user_list", None):
+		return []
+	
+	try:
+		q = Query('SELECT gebr_id, gebr_naam FROM tblgebruiker')
+		q.run()
+		results = q.rows()
+	except DatabaseError:
+		raise InternalServerError
+	
+	resList = []
+	
+	for row in results:
+		resList.append({'id': row[0], 'naam': row[1]})
+	
+	return resList
+
+def handle_setpassword(params, json_data):
+	if 'id' in params:
+		gebr_id = params['id'][0]
+	else:
+		gebr_id = getLoginId(params)
+	
+	if gebr_id is None:
+		log.debug("No gebr_id available.")
+		return False
+	
+	if 'password' not in params:
+		log.debug("No password available.")
+		return False
+	
+	try:
+		q = Query('UPDATE tblgebruiker SET gebr_wachtwoord = %s WHERE gebr_id = %s')
+		q.run((sha512_crypt.encrypt(params['password'][0]), gebr_id))
+	except DatabaseError:
+		raise InternalServerError
+	
+	return True
+
+def handle_adduser(params, json_data):
+	if not hasPermission(params, "user_create", None):
+		return False
+	
+	if 'username' not in params or 'password' not in params:
+		return False
+	
+	try:
+		q = Query('INSERT INTO tblgebruikers (gebr_naam, gebr_wachtwoord) VALUES (%s, %s)')
+		q.run((params['username'][0], sha512_crypt.encrypt(params['password'][0])))
+	except DatabaseError:
+		raise InternalServerError
 	
 	return True
 
@@ -123,4 +189,7 @@ def handle_login(params, json_data):
 
 
 add_handler("/login", handle_login)
+add_handler("/users", handle_users)
+add_handler("/setpassword", handle_setpassword)
+add_handler("/adduser", handle_adduser)
 log.info("User module initialized.")
