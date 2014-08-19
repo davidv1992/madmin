@@ -147,7 +147,7 @@ def process_factuur(factuur, fac_id):
 	if system("pdflatex " + texFilename) <> 0:
 		return
 	
-	pdfFile = open(pdfFilename, "rb"
+	pdfFile = open(pdfFilename, "rb")
 	pdfAttachment = MIMEApplication(pdfFile.read())
 	pdfFile.close()
 	pdfAttachment.add_header('Content-Disposition', 'attachment', filename=pdfFilename)
