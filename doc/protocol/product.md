@@ -25,11 +25,11 @@ PRODUCT := {
 	'naam': product_naam,
 	'type': product_type,
 	'btw': btw_percentage,
-	'kantineprijs_leden': kantineprijs_ledenvanleden,
-	'kantineprijs_extern': kantineprijs_externen,
-	'borrelmarge': marge_borrelverkoop,
+	('kantineprijs_leden': kantineprijs_ledenvanleden,)?
+	('kantineprijs_extern': kantineprijs_externen,)?
+	('borrelmarge': marge_borrelverkoop,)?
 	'leverancier_id': idcode_for_product_leverancier,
-	'embalageprijs': embalagevalue,
+	('embalageprijs': embalagevalue,)?
 	'related': [PRODUCT_RELATION*],
 }
 

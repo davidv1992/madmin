@@ -46,13 +46,18 @@ def _convert_product_rows(rows_prod, rows_rel):
 			'naam':product[1],
 			'type':policy.product_name_mapping[product[2]],
 			'btw':product[3],
-			'kantineprijs_leden':product[4],
-			'kantineprijs_extern':product[5],
-			'borrelmarge':product[6],
 			'leverancier_id':product[7],
-			'embalageprijs':product[8],
 			'related':cur_relations
 		})
+		
+		if product[4] is not None:
+			result[-1]['kantineprijs_leden'] = product[4]
+		if product[5] is not None:
+			result[-1]['kantineprijs_extern'] = product[5]
+		if product[6] is not None:
+			result[-1]['borrelmarge'] = product[6]
+		if product[8] is not None:
+			result[-1]['emballageprijs'] = product[8]
 	
 	return result
 
@@ -61,7 +66,7 @@ def query_product(prd_id):
 		q_prod = Query("""SELECT prd_id, prd_naam, prd_type, prd_btw,
 		                         prd_kantineprijs_leden, prd_kantineprijs_extern, 
 		                         prd_borrelmarge, prd_leverancier_id, 
-		                         prd_embalageprijs 
+		                         prd_emballageprijs 
 		                  FROM tblproduct WHERE prd_verwijderd = 0 AND prd_id = %s""")
 		q_prod.run((prd_id,))
 		rows_prod = q_prod.rows()
@@ -82,7 +87,7 @@ def handle_product_all(params, json_data):
 		q_prod = Query("""SELECT prd_id, prd_naam, prd_type, prd_btw,
 		                         prd_kantineprijs_leden, prd_kantineprijs_extern, 
 		                         prd_borrelmarge, prd_leverancier_id, 
-		                         prd_embalageprijs 
+		                         prd_emballageprijs 
 		                  FROM tblproduct WHERE prd_verwijderd = 0 
 		                  ORDER BY prd_id""")
 		q_prod.run()
@@ -109,7 +114,7 @@ def handle_product(params, json_data):
 		q_prod = Query("""SELECT prd_id, prd_naam, prd_type, prd_btw,
 				                 prd_kantineprijs_leden, prd_kantineprijs_extern, 
 				                 prd_borrelmarge, prd_leverancier_id, 
-				                 prd_embalageprijs 
+				                 prd_emballageprijs 
 				          FROM tblproduct WHERE prd_verwijderd = 0
 				          AND prd_id = %s
 				          ORDER BY prd_id""")

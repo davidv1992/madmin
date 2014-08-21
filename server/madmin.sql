@@ -1,13 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 3.5.8.1deb1
+-- version 4.0.10deb1
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Feb 04, 2014 at 09:21 AM
--- Server version: 5.5.34-0ubuntu0.13.04.1
--- PHP Version: 5.4.9-4ubuntu2.4
+-- Generation Time: Aug 21, 2014 at 09:13 AM
+-- Server version: 5.5.38-0ubuntu0.14.04.1
+-- PHP Version: 5.5.9-1ubuntu4.3
 
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
 
@@ -171,11 +171,11 @@ CREATE TABLE IF NOT EXISTS `tblproduct` (
   `prd_naam` text NOT NULL,
   `prd_type` int(11) NOT NULL,
   `prd_btw` int(11) NOT NULL,
-  `prd_kantineprijs_leden` int(11) NOT NULL,
-  `prd_kantineprijs_extern` int(11) NOT NULL,
-  `prd_borrelmarge` int(11) NOT NULL,
+  `prd_kantineprijs_leden` int(11) DEFAULT NULL,
+  `prd_kantineprijs_extern` int(11) DEFAULT NULL,
+  `prd_borrelmarge` int(11) DEFAULT NULL,
   `prd_leverancier_id` text NOT NULL,
-  `prd_embalageprijs` int(11) NOT NULL,
+  `prd_emballageprijs` int(11) DEFAULT NULL,
   PRIMARY KEY (`prd_id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
