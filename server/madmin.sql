@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 21, 2014 at 09:13 AM
+-- Generation Time: Aug 21, 2014 at 10:42 AM
 -- Server version: 5.5.38-0ubuntu0.14.04.1
 -- PHP Version: 5.5.9-1ubuntu4.3
 
@@ -27,7 +27,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE IF NOT EXISTS `tblbarcode` (
-  `bar_ean` int(16) NOT NULL,
+  `bar_ean` varchar(255) NOT NULL,
   `bar_prd_id` int(11) NOT NULL,
   PRIMARY KEY (`bar_ean`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
