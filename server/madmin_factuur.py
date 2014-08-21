@@ -209,6 +209,10 @@ def process_factuur_regel_inkoop(regel, factuur_id, regels_processed):
 		if regel['totaalprijs']*regel['btw'] % (1000+regel['btw']) > (999+regel['btw'])/2:
 			btw += 1
 		
+		
+		stukprijs_voorraad = regel['stukprijs']
+		if 'borrelmarge' in product:
+			stukprijs_voorraad = (stukprijs_voorraad * product['borrelmarge'])/1000
 		vrd_id = add_voorraad(regel['product_id'], regel['stukprijs'], regel['btw'], -regel['aantal'])
 		
 		try:
