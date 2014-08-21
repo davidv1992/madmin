@@ -37,13 +37,15 @@ Stock WHERE product = idProduct AND prd_naam = name
 ```
 
 --->8--- debug queries
+```
 select prd_id as vrd_prd_id, prd_naam, from_unixtime(date) as vrd_datum,
 purchasedAmount as vrd_aantal, currentAmount as vrd_resterend, ((Stock.price /
 purchasedAmount) * (1 + (margin / 100)) * (1 + (vatRate / 100))) as
 vrd_stukprijs, ((Stock.price / purchasedAmount) * (1 + (margin / 100)) *
 (vatRate / 100)) as vrd_btw from Product, tblproduct, Stock WHERE product =
 idProduct and prd_naam = name
-
+```
+```
 select prd_id as vrd_prd_id, prd_naam, from_unixtime(date) as vrd_datum,
 purchasedAmount as vrd_aantal, currentAmount as vrd_resterend,
 round(((Stock.price / purchasedAmount) * (1 + (margin / 100)) * (1 + (vatRate /
@@ -51,4 +53,5 @@ round(((Stock.price / purchasedAmount) * (1 + (margin / 100)) * (1 + (vatRate /
 (margin / 100)) * (vatRate / 100)), 0) as vrd_btw, (Stock.price /
 purchasedAmount) from Product, tblproduct, Stock WHERE product = idProduct and
 prd_naam = name
+```
 ---8<--- /debug
