@@ -12,20 +12,33 @@ _regelLayout = [
 ]
 
 def parseMoney(text):
-	hadComma = False
 	value = 0
-	for i in range(0, len(text)):
-		if text[i] != ',' and (text[i] < '0' or text[i] > '9'):
-			return (False, 0)
-		if text[i] == ',' and hadComma:
-			return (False, 0)
-		if text[i] == ',':
-			value *= 100
-		else:
-			value += ord(text[i]) - ord('0')
 	
-	if not hadComma:
-		value *= 100
+	segments = text.split(',')
+	if len(segments) > 2:
+		return (False, 0)
+		
+	euros = 0
+	cents = 0
+	for i in range(0, len(segments[0])):
+		if segments[0][i] < '0' or segments[0][i] > '9':
+			return (False, 0)
+		euros *= 10
+		euros += ord(segments[0][i]) - ord('0')
+	
+	if len(segments) == 2:
+		if len(segments[1]) > 2:
+			return (False, 0)
+		for i in range(0, len(segments[1])):
+			if segments[1][i] < '0' or segments[1][i] > '9':
+				return (False, 0)
+			cents *= 10
+			cents += ord(segments[1][i]) - ord('0')
+	
+		if len(segments[1]) == 1:
+			cents *= 10;
+	
+	value = euros*100 + cents
 	
 	return (True, value)
 
@@ -54,7 +67,7 @@ class FactuurInputRegel(Container):
 			self.setChildPos(self.fieldControlIdx[i], offset, 0)
 			offset += _regelLayout[i][1] * self.boxPerWeight
 	
-	def generateFactuurRegel(self):
+	def generateFactuurRegel(self, invertAmount):
 		result = {}
 		
 		if self.fieldControl[0].text == "":
@@ -65,6 +78,8 @@ class FactuurInputRegel(Container):
 		else:
 			result['naam'] = self.fieldControl[0].text
 		result['aantal'] = int(self.fieldControl[1].text)
+		if invertAmount:
+			result['aantal'] = -result['aantal']
 		if self.fieldControl[2].text != "":
 			(isOk, stukprijs) = parseMoney(self.fieldControl[2].text)
 			if not isOk:
