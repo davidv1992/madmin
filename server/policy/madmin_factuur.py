@@ -2,9 +2,14 @@ from madmin_products import query_product
 from madmin_vereniging import query_vereniging
 from madmin_budget import budget_query
 from os import system
+import os
 from smtplib import SMTP
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import logging
+
+log = logging.getLogger(__name__)
 
 #factuur types
 factuur_type_inkoop  = 1
@@ -20,8 +25,9 @@ factuur_type_mapping = {
 	'verkoop': factuur_type_verkoop
 }
 
-factuur_pdf_dir = '/var/www/facturen/'
-factuur_sender = ''
+factuur_pdf_dir = os.path.dirname(os.path.abspath(__file__))+'/../../../writable/facturen/'
+factuur_log = os.path.dirname(os.path.abspath(__file__))+'/../../../writable/texlog.txt'
+factuur_sender = 'www-madmin@science.ru.nl'
 
 template = R"""
 \documentclass[a4paper]{article}
@@ -92,7 +98,7 @@ def _moneyConvert(value):
 	value /= 100
 	if cents < 10:
 		return str(value)+ ",0" + str(cents)
-	return str(value) + "." + str(cents)
+	return str(value) + "," + str(cents)
 
 def process_factuur(factuur, fac_id):
 	#process regels
@@ -144,7 +150,10 @@ def process_factuur(factuur, fac_id):
 	texfile.write(texCode)
 	texfile.close()
 	
-	if system("pdflatex " + texFilename) <> 0:
+	os.chdir(os.path.dirname(__file__) + "/../../../writable/facturen")
+
+	if system("pdflatex " + texFilename + " >>" + factuur_log) <> 0:
+		log.warning("Kon geen pdf produceren.")
 		return
 	
 	pdfFile = open(pdfFilename, "rb")
@@ -164,5 +173,6 @@ def process_factuur(factuur, fac_id):
 	email.attach(pdfAttachment)
 	
 	s = SMTP()
+	s.connect()
 	s.sendmail(factuur_sender, receiver, email.as_string())
 	s.quit()
