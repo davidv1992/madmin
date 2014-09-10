@@ -171,6 +171,8 @@ def process_factuur(factuur):
 		budget_update(saldo_basis, mutatie_basis)
 		budget_speciaal = budget_query(saldo_speciaal)[0]
 		budget_basis = budget_query(saldo_basis)[0]
+		factuur['saldo_basis_na'] = budget_basis['current']
+		factuur['saldo_speciaal_na'] = budget_speciaal['current']
 		try:
 			q = Query("""UPDATE tblfactuur SET saldo_speciaal_na = %s
 			                                   saldo_basis_na = %s
@@ -181,6 +183,7 @@ def process_factuur(factuur):
 	elif saldo_basis is not None:
 		budget_update(saldo_basis, factuur_bedrag)
 		budget_basis = budget_query(saldo_basis)[0]
+		factuur['saldo_basis_na'] = budget_basis['current']
 		try:
 			q = Query("""UPDATE tblfactuur SET fac_saldo_basis_na = %s
 			                               WHERE fac_id = %s""")
@@ -447,7 +450,7 @@ def parse_factuur_regels(regels):
 			if type(regel['totaalprijs']) != int:
 				log.debug("totaalprijs wrong type")
 				raise MalformedDataException
-			curRegel['totaalrpijs'] = regel['totaalprijs']
+			curRegel['totaalprijs'] = regel['totaalprijs']
 		
 		if 'btw' in regel:
 			if type(regel['btw']) != int:
@@ -576,7 +579,7 @@ def convert_factuur_rows(params, regels):
 				huidige_factuur['saldo_basis_na'] = regels[i][12]
 		
 			if regels[0][3] is not None:
-				huidige_factuur['vereniging'] = regels[i][3]
+				huidige_factuur['vereniging_id'] = regels[i][3]
 		
 			if regels[0][4] is not None:
 				huidige_factuur['leverancier'] = regels[i][4]
