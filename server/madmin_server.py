@@ -80,7 +80,7 @@ def handler(req):
 		response_json = json.dumps(response)
 	except (TypeError, ValueError) as e:
 		log.error("Unable to convert response from %s to json, object %s.",
-		           target, response, exc_info = e)
+		           req.uri, response, exc_info = e)
 		return apache.HTTP_INTERNAL_SERVER_ERROR
 	
 	req.headers_out.add('Content-Type', 'application/json')
