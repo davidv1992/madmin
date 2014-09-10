@@ -1,1 +1,1 @@
-prefix = '/madmin'
+prefix = ''
