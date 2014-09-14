@@ -2,6 +2,7 @@ from gui_lib.container import Container
 from gui_lib.label import Label
 from gui_lib.listbox import Listbox
 from factuurDetail import factuurDetail
+from verenigingNaamCoupler import getVerenigingNaam
 import curses
 
 class factuurListItem(Label):
