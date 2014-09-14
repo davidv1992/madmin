@@ -4,6 +4,7 @@ from manager import factuurManager
 from gui_lib.core import mainloop
 from client_lib.login import prompt_login
 from client_lib.servercall import remote_call
+from client_lib.servercall import ServerCallException
 import argparse
 import getpass
 import sys
