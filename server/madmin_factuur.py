@@ -14,9 +14,10 @@ class MalformedDataException(Exception):
 	pass
 
 class NonExistingProductException(Exception):
-	def __init__(self, product_id):
+	def __init__(self, product_id, product_name):
 		Exception.__init__(self, "Product does not exist")
 		self.product_id = product_id
+		self.product_name = product_name
 
 class NonExistingVerenigingException(Exception):
 	def __init__(self, vereniging):
@@ -63,7 +64,7 @@ def handle_factuur_create(params, json_data):
 			fac_id = process_factuur(factuur)
 			policy.process_factuur(factuur, fac_id)
 	except NonExistingProductException, e:
-		return {'error': 'No such product {0}'.format(e.product_id), 'product_id': e.product_id}
+		return {'error': 'No such product {0}: {1}'.format(e.product_id, e.product_name), 'product_id': e.product_id, 'product_name': e.product_name}
 	except NonExistingVerenigingException, e:
 		return {'error': 'No such vereniging {0}'.format(e.vereniging), 'vereniging_id': e.vereniging}
 	except NonExistingBudgetException, e:
@@ -382,7 +383,7 @@ def verify_factuur_regel(regel, vrd_aantallen):
 		return
 	#check existence
 	if len(query_product(regel['product_id'])) == 0:
-		raise NonExistingProductException(product_id = regel['product_id'])
+		raise NonExistingProductException(product_id = regel['product_id'], product_name = regel['naam'])
 	
 	if regel['product_id'] not in vrd_aantallen:
 		vrd_aantallen[regel['product_id']] = 0
