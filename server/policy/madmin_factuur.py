@@ -166,7 +166,7 @@ def process_factuur(factuur, fac_id):
 	
 	if 'vereniging' in factuur:
 		receiver = query_vereniging(factuur['vereniging'])[0]['email']
-	else
+	else:
 		receiver = default_receiver
 	
 	email = MIMEMultipart()
