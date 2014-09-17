@@ -133,7 +133,7 @@ class factuurInfobox(Container):
 		self.factuur = factuur
 		
 		#Layout settings
-		self.labelWidth = 17
+		self.labelWidth = 19
 		self.minValueWidth = 20
 		
 		if 'vereniging_id' in factuur:	
@@ -209,9 +209,9 @@ class factuurInfobox(Container):
 			if self.hasVerantwoordelijke:
 				self.height = 3
 				self.verantwoordelijkeLabel.resize(self.labelWidth,1)
-				self.setChildPos(self.verantwoordelijkeLabelIdx, 2, 0)
+				self.setChildPos(self.verantwoordelijkeLabelIdx, 0, 2)
 				self.verantwoordelijkeValue.resize(width-self.labelWidth,1)
-				self.setChildPos(self.verantwoordelijkeValueIdx, 2, self.labelWidth)
+				self.setChildPos(self.verantwoordelijkeValueIdx, self.labelWidth, 2)
 			else:
 				self.height = 2
 		else:
