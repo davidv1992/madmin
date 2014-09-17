@@ -28,6 +28,7 @@ factuur_type_mapping = {
 factuur_pdf_dir = os.path.dirname(os.path.abspath(__file__))+'/../../../writable/facturen/'
 factuur_log = os.path.dirname(os.path.abspath(__file__))+'/../../../writable/texlog.txt'
 factuur_sender = 'www-madmin@science.ru.nl'
+default_receiver = 'olympusfacturen@science.ru.nl'
 
 template = R"""
 \documentclass[a4paper]{article}
@@ -163,7 +164,10 @@ def process_factuur(factuur, fac_id):
 	
 	emailText = MIMEText("Dit is een automatisch gegenereerde mail met de laatste factuur.", 'plain')
 	
-	receiver = query_vereniging(factuur['vereniging'])[0]['email']
+	if 'vereniging' in factuur:
+		receiver = query_vereniging(factuur['vereniging'])[0]['email']
+	else
+		receiver = default_receiver
 	
 	email = MIMEMultipart()
 	email['Subject'] = "Madmin factuur"
