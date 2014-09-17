@@ -575,20 +575,20 @@ def convert_factuur_rows(params, regels):
 				'regels': []
 			}
 		
-			if regels[0][10] is not None:
+			if regels[i][10] is not None:
 				huidige_factuur['saldo_basis'] = regels[i][10]
 				huidige_factuur['saldo_basis_na'] = regels[i][12]
 		
-			if regels[0][3] is not None:
+			if regels[i][3] is not None:
 				huidige_factuur['vereniging_id'] = regels[i][3]
 		
-			if regels[0][4] is not None:
+			if regels[i][4] is not None:
 				huidige_factuur['leverancier'] = regels[i][4]
 		
-			if regels[0][8] is not None:
+			if regels[i][8] is not None:
 				huidige_factuur['verantwoordelijke'] = regels[i][8]
 		
-			if regels[0][9] is not None:
+			if regels[i][9] is not None:
 				huidige_factuur['saldo_speciaal'] = regels[i][9]
 				huidige_factuur['saldo_speciaal_na'] = regels[i][11]
 			
