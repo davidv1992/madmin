@@ -77,6 +77,7 @@ class FactuurInputRegel(Container):
 			result['product_id'] = self.fieldControl[0].currentID
 		else:
 			result['naam'] = self.fieldControl[0].text
+			result['btw'] = 0
 		result['aantal'] = int(self.fieldControl[1].text)
 		if invertAmount:
 			result['aantal'] = -result['aantal']
