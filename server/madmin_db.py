@@ -33,6 +33,7 @@ def _db_connect():
 	global _connection
 	global _has_error
 	try:
+		log.debug("Connecting to %s, user %s, db %s", db_config.host, db_config.username, db_config.database)
 		_connection = dbapi.connect(db_config.host, db_config.username, 
 		                            db_config.password, db_config.database)
 	except dbapi.Error, e:
@@ -87,7 +88,7 @@ class Query(object):
 			else:
 				self.cursor.execute(self.querystring, parameters)
 			_connection.commit()
-			log.debug("Query %s, rows affected: %d", self.querystring, self.cursor.rowcount)
+			log.debug("Query %s, data %s, rows affected: %d", self.querystring, parameters, self.cursor.rowcount)
 		except dbapi.Error, e:
 			log.error("Error during query execution.", exc_info=e)
 			log.error("Query %s", self.querystring)

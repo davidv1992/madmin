@@ -103,12 +103,12 @@ def _moneyConvert(value):
 
 def process_factuur(factuur, fac_id):
 	#process regels
-	if 'vereniging' not in factuur:
-		return
 	
+	log.debug("Start email generation")
 	regels = ""
 	totaal = 0
 	for regel in factuur['regels']:
+		log.debug("factuurregel processing")
 		if 'naam' in regel:
 			naam = regel['naam']
 		else:
@@ -142,6 +142,8 @@ def process_factuur(factuur, fac_id):
 		info['speciaalsaldo'] = ""
 		info['speciaalsaldona'] = 0.0
 	
+
+	log.debug("formatting")
 	texCode = template % info
 	
 	texFilename = factuur_pdf_dir + "factuur" + str(fac_id) + ".tex"
@@ -157,6 +159,8 @@ def process_factuur(factuur, fac_id):
 		log.warning("Kon geen pdf produceren.")
 		return
 	
+	log.debug("Pdf produced")
+
 	pdfFile = open(pdfFilename, "rb")
 	pdfAttachment = MIMEApplication(pdfFile.read())
 	pdfFile.close()

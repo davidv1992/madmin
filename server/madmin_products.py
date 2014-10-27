@@ -62,6 +62,7 @@ def _convert_product_rows(rows_prod, rows_rel):
 	return result
 
 def query_product(prd_id):
+	log.debug("Query for product %s", prd_id)
 	try:
 		q_prod = Query("""SELECT prd_id, prd_naam, prd_type, prd_btw,
 		                         prd_kantineprijs_leden, prd_kantineprijs_extern, 
