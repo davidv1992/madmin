@@ -7,6 +7,7 @@ from smtplib import SMTP
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from math import copysign
 import logging
 
 log = logging.getLogger(__name__)
@@ -107,15 +108,20 @@ def process_factuur(factuur, fac_id):
 	log.debug("Start email generation")
 	regels = ""
 	totaal = 0
+	indx = 0
 	for regel in factuur['regels']:
-		log.debug("factuurregel processing")
+		indx+=1
+		log.debug("factuurregel processing %s of %s", indx, len(factuur['regels']))
 		if 'naam' in regel:
 			naam = regel['naam']
 		else:
 			naam = query_product(regel['product_id'])[0]['naam']
 		regels += naam + " & " + str(regel['aantal']) + " & " 
 		regels += _moneyConvert(regel['stukprijs']) + " & " + _moneyConvert(regel['totaalprijs']) + "\\\\\n"
-		totaal += regel['totaalprijs']
+		totaal += copysign(regel['totaalprijs'], regel['aantal'])
+	
+	
+	log.debug("Querying global info")
 	
 	info = {}
 	
@@ -145,6 +151,8 @@ def process_factuur(factuur, fac_id):
 
 	log.debug("formatting")
 	texCode = template % info
+	
+	log.deubg("producing pdf")
 	
 	texFilename = factuur_pdf_dir + "factuur" + str(fac_id) + ".tex"
 	pdfFilename = factuur_pdf_dir + "factuur" + str(fac_id) + ".pdf"
