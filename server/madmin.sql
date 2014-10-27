@@ -1,13 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 4.0.10deb1
+-- version 3.5.6
 -- http://www.phpmyadmin.net
 --
--- Host: localhost
--- Generation Time: Aug 21, 2014 at 10:42 AM
--- Server version: 5.5.38-0ubuntu0.14.04.1
--- PHP Version: 5.5.9-1ubuntu4.3
+-- Host: mysql-madmin.science.ru.nl
+-- Generation Time: Oct 27, 2014 at 10:41 AM
+-- Server version: 5.5.40-0ubuntu0.12.04.1-log
+-- PHP Version: 5.3.10-1ubuntu3.14
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
 
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `tblfactuurregel` (
   `frgl_fac_id` int(11) NOT NULL,
   `frgl_type` int(11) NOT NULL,
   `frgl_vrd_id` int(11) DEFAULT NULL,
-  `frgl_omschrijving` int(11) DEFAULT NULL,
+  `frgl_omschrijving` text,
   `frgl_aantal` int(11) NOT NULL,
   `frgl_stukprijs` int(11) NOT NULL,
   `frgl_totprijs` int(11) NOT NULL,
