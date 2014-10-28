@@ -14,11 +14,16 @@ def intConvert(value):
 	return str(value)
 
 def moneyConvert(value):
+	prefix = ""
+	if value < 0:
+		prefix = "-"
+		value = -value
+
 	cents = value % 100
 	value /= 100
 	if cents < 10:
-		return str(value)+ ",0" + str(cents)
-	return str(value) + "," + str(cents)
+		return prefix + str(value)+ ",0" + str(cents)
+	return prefix + str(value) + "," + str(cents)
 
 _regelLayout = [
 	('Productnaam', 'naam', 2, strConvert),
