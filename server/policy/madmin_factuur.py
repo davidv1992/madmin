@@ -128,7 +128,7 @@ def process_factuur(factuur, fac_id):
 	info['factuurregels'] = regels
 	if 'vereniging' in factuur:
 		info['vereniging'] = query_vereniging(factuur['vereniging'])[0]['naam']
-	else
+	else:
 		info['vereniging'] = factuur['leverancier']
 	info['factuurnummer'] = factuur['volgnummer']
 	info['factuurdatum'] = factuur['factuurdatum']
