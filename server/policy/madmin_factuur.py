@@ -155,7 +155,7 @@ def process_factuur(factuur, fac_id):
 	log.debug("formatting")
 	texCode = template % info
 	
-	log.deubg("producing pdf")
+	log.debug("producing pdf")
 	
 	texFilename = factuur_pdf_dir + "factuur" + str(fac_id) + ".tex"
 	pdfFilename = factuur_pdf_dir + "factuur" + str(fac_id) + ".pdf"
