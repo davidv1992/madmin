@@ -7,6 +7,18 @@ import sys
 import client_lib.servercall as servercall
 from client_lib.login import prompt_login
 
+def moneyConvert(value):
+	prefix = ""
+	if value < 0:
+		prefix = "-"
+		value = -value
+
+	cents = value % 100
+	value /= 100
+	if cents < 10:
+		return prefix + str(value)+ ",0" + str(cents)
+	return prefix + str(value) + "," + str(cents)
+
 #command line parsing
 cmd_parser = argparse.ArgumentParser(description='Vraag budgetinformatie op voor 1 of meer verenigingen')
 
@@ -49,11 +61,7 @@ if arguments.all:
 			sys.exit(1)
 		print '{0}:'.format(vereniging['naam'])
 		for budget in budgetten:
-			current_euro = budget['current']/100
-			current_cent = budget['current']%100
-			minimum_euro = budget['minimum']/100
-			minimum_cent = budget['minimum']%100
-			print '{0}: {1}.{2:02} (Minimum: {3}.{4:02})'.format(budget['naam'], current_euro, current_cent, minimum_euro, minimum_cent)
+			print '{0}: {1} (Minimum: {2})'.format(budget['naam'], moneyConvert(budget['current']), moneyConvert(budget['minimum']))
 
 for vereniging in arguments.verenigingen:
 	selection = filter(lambda x: x['naam'] == vereniging, verenigingen)
@@ -68,8 +76,4 @@ for vereniging in arguments.verenigingen:
 		sys.exit(1)
 	print '{0}:'.format(vereniging)
 	for budget in budgetten:
-		current_euro = budget['current']/100
-		current_cent = budget['current']%100
-		minimum_euro = budget['minimum']/100
-		minimum_cent = budget['minimum']%100
-		print '{0}: {1}.{2:02} (Minimum: {3}.{4:02})'.format(budget['naam'], current_euro, current_cent, minimum_euro, minimum_cent)
+		print '{0}: {1} (Minimum: {2})'.format(budget['naam'], moneyConvert(budget['current']), moneyConvert(budget['minimum']))
