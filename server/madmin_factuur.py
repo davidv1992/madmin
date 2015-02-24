@@ -2,7 +2,7 @@ import logging
 import datetime
 
 from madmin_server import InternalServerError, add_handler
-from madmin_db import Query, DatabaseError
+from madmin_db import Query, DatabaseError, commit, rollback, start_transaction
 from madmin_user import hasPermission
 from madmin_voorraad import add_voorraad, use_voorraad, ammount_voorraad
 from madmin_products import query_product
@@ -60,19 +60,26 @@ def handle_factuur_create(params, json_data):
 	
 	try:
 		for factuur in facturen:
+			start_transaction()
 			verify_factuur(factuur)
 			fac_id = process_factuur(factuur)
 			policy.process_factuur(factuur, fac_id)
+			commit()
 	except NonExistingProductException, e:
+		rollback()
 		return {'error': 'No such product {0}: {1}'.format(e.product_id, e.product_name), 'product_id': e.product_id, 'product_name': e.product_name}
 	except NonExistingVerenigingException, e:
+		
 		return {'error': 'No such vereniging {0}'.format(e.vereniging), 'vereniging_id': e.vereniging}
 	except NonExistingBudgetException, e:
+		rollback()
 		return {'error': 'No such budget {0}'.format(e.budget), 'budget_id': e.budget}
 	except IncompatibleBudgetException, e:
+		rollback()
 		return {'error': 'Budget {0} is not compatible with vereniging {1}'.format(e.budget, e.vereniging),
 		        'budget_id': e.budget, 'vereniging_id': e.vereniging}
 	except NoVoorraadException, e:
+		rollback()
 		return {'error': 'Not enough supplies of {0}'.format(e.product_id), 'product_id': e.product_id}
 	
 	return {'succes': len(facturen)}

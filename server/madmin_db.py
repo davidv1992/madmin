@@ -55,7 +55,33 @@ except DatabaseError:
 
 log.info("module initialized")
 
+_in_transaction = False
+_at_first_query = False
+_num_retries = 0
 
+def commit():
+	_in_transaction = False
+	_at_first_query = False
+	try:
+		_connection.commit()
+	except dbapi.Error, e:
+		log.error("Unable to commit current database transaction.", exc_info=e)
+		_has_error = True
+		raise DatabaseError
+
+def rollback():
+	_in_transaction = False
+	_at_first_query = False
+	try:
+		_connection.rollback()
+	except dbapi.Error, e:
+		pass
+
+def start_transaction():
+	q = Query("START TRANSACTION WITH CONSISTENT SNAPSHOT");
+	q.run();
+	_in_transaction = True;
+	_at_first_query = True;
 
 class Query(object):
 	"""
@@ -82,18 +108,41 @@ class Query(object):
 		"""Run query with given parameters"""
 		if _has_error:
 			_db_connect()
+			try:
+				self.cursor = _connection.cursor()
+			except dbapi.Error, e:
+				log.error("Unable tot recover from database problem.", exc_info=e)
+				_has_error = True
+				raise DatabaseError
 		try:
 			if (parameters is None):
 				self.cursor.execute(self.querystring)
 			else:
 				self.cursor.execute(self.querystring, parameters)
-			_connection.commit()
 			log.debug("Query %s, data %s, rows affected: %d", self.querystring, parameters, self.cursor.rowcount)
+			if not _in_transaction:
+				commit()
 		except dbapi.Error, e:
 			log.error("Error during query execution.", exc_info=e)
 			log.error("Query %s", self.querystring)
 			_has_error = True
-			raise DatabaseError
+			
+			#can we retry?
+			if not _in_transaction or _at_first_query:
+				log.error("Retrying after error")
+				if _num_retries > 5:
+					log.error("Too many retries, aborting.");
+					raise DatabaseError
+				if _in_transaction:
+					start_transaction()
+					self.cursor = _connection.cursor()
+				self.run(parameters)
+			else:
+				#ah well
+				raise DatabaseError
+			
+		#reset retry count, we were succesfull somehow
+		_num_retries = 0
 	
 	def rows(self):
 		global _has_error
@@ -102,7 +151,7 @@ class Query(object):
 		Can throw DatabaseError if query does not produce rows as a result
 		"""
 		if _has_error:
-			_db_connect()
+			raise DatabaseError # cannot return sensible result after an error, so error
 		try:
 			return self.cursor.fetchall()
 		except dbapi.Error, e:
