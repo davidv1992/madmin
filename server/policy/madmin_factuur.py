@@ -177,7 +177,10 @@ def process_factuur(factuur, fac_id):
 	pdfFile.close()
 	pdfAttachment.add_header('Content-Disposition', 'attachment', filename=pdfFilename)
 	
-	emailText = MIMEText("Dit is een automatisch gegenereerde mail met de laatste factuur.", 'plain')
+	emailContentTemplate = R"""Dit is een automatisch gegenereerde mail met de factuur %(vereniging)s %(factuurnummer)s, %(verantwoordelijke)s."""
+	emailSubjectTemplate = R"""Madmin factuur %(vereniging)s %(factuurnummer)s"""
+
+	emailText = MIMEText(emailContentTemplate % info, 'plain')
 	
 	if 'vereniging' in factuur:
 		receiver = query_vereniging(factuur['vereniging'])[0]['email']
@@ -185,7 +188,7 @@ def process_factuur(factuur, fac_id):
 		receiver = default_receiver
 	
 	email = MIMEMultipart()
-	email['Subject'] = "Madmin factuur"
+	email['Subject'] = emailSubjectTemplate % info
 	email['To'] = receiver
 	email['From'] = factuur_sender
 	email.attach(emailText)
