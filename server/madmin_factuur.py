@@ -114,8 +114,9 @@ def process_factuur(factuur):
 	# Generate next number for factuur
 	try:
 		q = Query("""SELECT MAX(fac_volgnummer)
-		             FROM tblfactuur
-		             WHERE fac_ver_id <=> %s AND fac_leverancier <=> %s""")
+		             FROM tblfactuur, tblboekjaar
+		             WHERE fac_ver_id <=> %s AND fac_leverancier <=> %s 
+		             AND fac_bkjr_id=bkjr_id AND bkjr_is_huidig = -1""")
 		q.run((vereniging, leverancier))
 		rows = q.rows()
 	except DatabaseError:
