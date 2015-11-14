@@ -225,6 +225,8 @@ def process_factuur_regel_inkoop(regel, factuur_id, regels_processed):
 		stukprijs_voorraad = regel['stukprijs']
 		if 'borrelmarge' in product:
 			stukprijs_voorraad = (stukprijs_voorraad * (1000+product['borrelmarge']))/1000
+			if (stukprijs_voorraad * (1000+product['borrelmarge']))%1000 > 0:
+				stukprijs_voorraad += 1
 		vrd_id = add_voorraad(regel['product_id'], stukprijs_voorraad, regel['btw'], -regel['aantal'])
 		
 		try:
