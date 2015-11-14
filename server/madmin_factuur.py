@@ -298,11 +298,7 @@ def process_factuur_regel_verkoop(regel, factuur_id, regels_processed):
 			btw = totaalprijs*vc['btw']/(1000+vc['btw'])
 			if totaalprijs*vc['btw']%(1000+vc['btw']) > (999+vc['btw'])/2:
 				btw += 1
-			#marge is in tenths of promile (10000 units is whole)
-			totaalprijs = (totaalprijs*(10000+product['borrelmarge']))/10000
-			if (totaalprijs*(10000+product['borrelmarge']))%10000:
-				totaalprijs += 1
-			#totaalprijs = int(totaalprijs * (1 + product['borrelmarge'] / 10000.))
+			totaalprijs = int(totaalprijs * (1 + product['borrelmarge'] / 10000.))
 			try:
 				q.run((factuur_id, vc['id'], vc['aantal'],
 				       vc['stukprijs'], totaalprijs, btw))
