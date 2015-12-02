@@ -60,6 +60,7 @@ _at_first_query = False
 _num_retries = 0
 
 def commit():
+	global _in_transaction, _at_first_query, _has_error
 	_in_transaction = False
 	_at_first_query = False
 	try:
@@ -70,6 +71,7 @@ def commit():
 		raise DatabaseError
 
 def rollback():
+	global _in_transaction, _at_first_query
 	_in_transaction = False
 	_at_first_query = False
 	try:
@@ -78,6 +80,7 @@ def rollback():
 		pass
 
 def start_transaction():
+	global _in_transaction, _at_first_query
 	q = Query("START TRANSACTION WITH CONSISTENT SNAPSHOT");
 	q.run();
 	_in_transaction = True;
@@ -104,7 +107,7 @@ class Query(object):
 			raise DatabaseError
 	
 	def run(self, parameters=None):
-		global _has_error
+		global _has_error, _num_retries, _in_transaction, _at_first_query
 		"""Run query with given parameters"""
 		if _has_error:
 			_db_connect()
