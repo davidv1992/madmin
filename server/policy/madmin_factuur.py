@@ -175,7 +175,7 @@ def process_factuur(factuur, fac_id):
 	pdfFile = open(pdfFilename, "rb")
 	pdfAttachment = MIMEApplication(pdfFile.read())
 	pdfFile.close()
-	attachmentFilename = info['vereniging'] + " - " + info['factuurdatum'] + " - " + info['factuurnummer'] + ".pdf"
+	attachmentFilename = str(info['vereniging']) + " - " + str(info['factuurdatum']) + " - " + str(info['factuurnummer']) + ".pdf"
 	pdfAttachment.add_header('Content-Disposition', 'attachment', filename=attachmentFilename)
 	
 	emailContentTemplate = R"""Dit is een automatisch gegenereerde mail met de factuur %(vereniging)s %(factuurnummer)s, %(verantwoordelijke)s."""
@@ -199,3 +199,5 @@ def process_factuur(factuur, fac_id):
 	s.connect()
 	s.sendmail(factuur_sender, receiver, email.as_string())
 	s.quit()
+	
+	log.debug("Mail sent")

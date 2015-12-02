@@ -62,12 +62,14 @@ _num_retries = 0
 def commit():
 	_in_transaction = False
 	_at_first_query = False
+	log.debug("Starting commit")
 	try:
 		_connection.commit()
 	except dbapi.Error, e:
 		log.error("Unable to commit current database transaction.", exc_info=e)
 		_has_error = True
 		raise DatabaseError
+	log.debug("Commit finished")
 
 def rollback():
 	_in_transaction = False
